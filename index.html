@@ -505,7 +505,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
       <button class="ghost" id="gReloc" style="width:100%;margin-top:8px">📍 用 Google 重新定位所有行程</button>
       <details style="margin-top:10px"><summary class="note">怎麼取得金鑰？（需要 Google Cloud 帳單帳戶）</summary>
         <ol class="note" style="padding-left:18px"><li>到 console.cloud.google.com 建立專案並綁定付款方式。</li><li>在「API 和服務」啟用 Places API (New) 與 Routes API 兩個服務。</li><li>建立 API 金鑰；在限制裡選「網站」，填 https://yu-tinglu.github.io/* ，API 限制只選 Places API (New)。</li><li>把金鑰貼回這裡儲存。</li></ol>
-        <div class="note">Google 對這類查詢依用量計費（有每月免費額度，詳情請看 Google 的價格頁），建議在 Google Cloud 設定預算提醒。</div>
+        <div class="note">Google 目前對每種服務有每月免費額度（找地點約 5,000 次、探索搜尋約 1,000 次、路線時間約 10,000 次，以 Google 價格頁為準），超過才收費。個人旅遊規劃通常用不到，但仍建議：①在 Google Cloud 設預算提醒；②到「配額」把每個 API 的每日上限調低（例如 50–100 次），就不會意外超額。</div>
       </details>
     </div>
     <div class="card hidden" id="fbCard">
@@ -883,7 +883,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 /* ---------- 行程編輯 ---------- */
 $('mode').onchange=()=>{renderDays();renderMap()};
 /* ---------- Google 地圖資料（有金鑰時優先使用） ---------- */
-const GFIELDS='places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.primaryTypeDisplayName,places.googleMapsUri,places.photos';
+const GF_BASIC='places.id,places.displayName,places.formattedAddress,places.location,places.primaryTypeDisplayName,places.googleMapsUri',GF_RICH=GF_BASIC+',places.rating,places.userRatingCount';
 let gErrShown=false;
 function gErr(e){if(gErrShown)return;gErrShown=true;toast(e&&(e.status===400||e.status===403)?'Google 金鑰無法使用（請確認已啟用 Places API (New)、Routes API，且網址限制含 yu-tinglu.github.io），先改用免費資料':'Google 查詢暫時失敗，先改用免費資料')}
 async function gText(q,c,o={}){
@@ -891,26 +891,26 @@ async function gText(q,c,o={}){
   const body={textQuery:q,languageCode:'zh-TW',maxResultCount:o.n||10};
   if(S.kind==='tw')body.regionCode='TW';
   if(c)body.locationBias={circle:{center:{latitude:c.lat,longitude:c.lng},radius:Math.min(o.radius||20000,50000)}};
-  const r=await fetch('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':GFIELDS},body:JSON.stringify(body)});
+  const r=await fetch('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':o.rich?GF_RICH:GF_BASIC},body:JSON.stringify(body)});
   if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}
-  return ((await r.json()).places||[]).map(p=>({id:p.id,name:(p.displayName&&p.displayName.text)||'',addr:p.formattedAddress||'',lat:p.location?p.location.latitude:null,lng:p.location?p.location.longitude:null,kind:(p.primaryTypeDisplayName&&p.primaryTypeDisplayName.text)||'',rating:p.rating,count:p.userRatingCount||0,uri:p.googleMapsUri||'',photo:p.photos&&p.photos[0]?p.photos[0].name:''})).filter(p=>p.name&&p.lat!=null);
+  return ((await r.json()).places||[]).map(p=>({id:p.id,name:(p.displayName&&p.displayName.text)||'',addr:p.formattedAddress||'',lat:p.location?p.location.latitude:null,lng:p.location?p.location.longitude:null,kind:(p.primaryTypeDisplayName&&p.primaryTypeDisplayName.text)||'',rating:p.rating,count:p.userRatingCount||0,uri:p.googleMapsUri||'',photo:''})).filter(p=>p.name&&p.lat!=null);
 }
 const gPhoto=n=>n?`https://places.googleapis.com/v1/${n}/media?maxHeightPx=420&maxWidthPx=640&key=${encodeURIComponent(getKey())}`:'';
 const gScore=p=>(p.rating||0)*Math.log10((p.count||0)+10);
 const gDesc=p=>[p.kind,p.rating?'⭐'+p.rating+'（'+fmt(p.count)+' 則 Google 評論）':'',p.addr].filter(Boolean).join('｜');
 async function fetchFoodG(c,limit){
   const where=ex.place||S.trip.dest||'',qs=limit>20?['美食 餐廳','小吃','咖啡廳','早餐']:['美食 餐廳'];
-  const res=await Promise.all(qs.map(q=>gText(where+' '+q,c,{n:20,radius:8000}).catch(e=>{if(e.status)throw e;return []})));
+  const res=await Promise.all(qs.map(q=>gText(where+' '+q,c,{n:20,radius:8000,rich:true}).catch(e=>{if(e.status)throw e;return []})));
   const seen=new Set();
   return res.flat().filter(p=>!seen.has(p.id)&&seen.add(p.id)&&p.count>=10).sort((a,b)=>gScore(b)-gScore(a)).slice(0,limit)
-    .map(p=>({type:'food',name:p.name,score:gScore(p),amenity:/咖啡|cafe|coffee/i.test(p.kind)?'cafe':'restaurant',desc:gDesc(p),tip:'',cost:0,lat:p.lat,lng:p.lng,url:'',img:gPhoto(p.photo)}));
+    .map(p=>({type:'food',name:p.name,score:gScore(p),amenity:/咖啡|cafe|coffee/i.test(p.kind)?'cafe':'restaurant',desc:gDesc(p),tip:'',cost:0,lat:p.lat,lng:p.lng,url:'',img:''}));
 }
 async function fetchSightsG(c,limit){
   const where=ex.place||S.trip.dest||'';
-  const p=await gText(where+' 景點 觀光',c,{n:20,radius:15000});
+  const p=await gText(where+' 景點 觀光',c,{n:20,radius:15000,rich:true});
   const bad=/車站|學校|大學|醫院|公司|飯店|旅館/;
   return p.filter(x=>!bad.test(x.name)&&x.count>=20).sort((a,b)=>gScore(b)-gScore(a)).slice(0,limit)
-    .map(x=>({type:'sight',name:x.name,score:gScore(x),desc:gDesc(x),tip:'',cost:0,lat:x.lat,lng:x.lng,img:gPhoto(x.photo),url:''}));
+    .map(x=>({type:'sight',name:x.name,score:gScore(x),desc:gDesc(x),tip:'',cost:0,lat:x.lat,lng:x.lng,img:'',url:''}));
 }
 /* 點到點：Google 路線時間 */
 const legReal={},legTry=new Set();let legBusy=false;
