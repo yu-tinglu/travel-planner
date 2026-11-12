@@ -152,6 +152,7 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 .lm{display:flex;gap:2px;background:var(--card);border-radius:10px;padding:2px}.lm button{background:none;padding:3px 8px;font-size:15px;border-radius:8px;box-shadow:none;line-height:1.2}.lm button.on{background:var(--acc);color:#fff}
 .li{flex:1;min-width:0}.li b{color:var(--ink);margin-right:6px}.leg .lnk{margin:0;font-size:12.5px}
 .warnl{flex-basis:100%;color:var(--warn);font-size:12px}
+.stop.editing{outline:3px solid var(--warm);outline-offset:3px;border-radius:14px;background:var(--acc2);box-shadow:0 0 0 6px rgba(226,112,79,.18)}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -741,7 +742,7 @@ function renderDays(){
     $('routeLink').href='https://www.google.com/maps/dir/?api=1&origin='+mapQ(list[0])+'&destination='+mapQ(list[list.length-1])+(mid?'&waypoints='+mid:'')+'&travelmode='+$('mode').value;
   }
   $('stops').innerHTML=list.length?list.map((s,i)=>`
-    <div class="stop" data-id="${s.id}">
+    <div class="stop${s.id===editId?' editing':''}" data-id="${s.id}">
       <div class="grip" title="拖曳排序">⠿</div>
       <div class="tcol">${s.time?`<b>${esc(s.time)}</b>`:'<b class="no">--:--</b>'}${s.dur?`<span>${s.dur<60?s.dur+'分':(s.dur/60).toFixed(s.dur%60?1:0).replace(/\.0$/,'')+'時'}</span>`:''}</div>
       <div class="thumb" data-ph="${s.id}">${s.photo?`<img src="${s.photo}" alt="">`:EMO[s.cat]}</div>
@@ -841,7 +842,7 @@ $('chFill').onclick=()=>{
 $('dayChips').onclick=e=>{const d=e.target.dataset.d;if(d!=null){day=+d;if(!editId)$('sDay').value=String(day);renderDays();renderMap()}};
 function resetForm(){editId=null;if($('addBox'))$('addBox').open=false;['sTime','sName','sCost','sNote','sDur'].forEach(i=>$(i).value='');$('sCat').value='景點';$('sDay').value=String(day);
   $('sSave').textContent='加入行程';$('formTitle').textContent='新增景點／活動';$('sCancel').style.display='none'}
-$('sCancel').onclick=resetForm;
+$('sCancel').onclick=()=>{resetForm();renderDays()};
 $('sSave').onclick=()=>{
   const name=$('sName').value.trim();
   if(!name){$('sName').focus();return}
@@ -858,7 +859,7 @@ $('stops').onclick=e=>{
   else if(ed){const s=S.stops.find(v=>v.id===ed);editId=ed;
     $('sTime').value=s.time;setDur(s.dur);$('sName').value=s.name;$('sCat').value=s.cat;$('sCost').value=s.cost||'';$('sNote').value=s.note;$('sDay').value=String(s.day);
     $('sSave').textContent='儲存修改';$('formTitle').textContent='編輯行程';$('sCancel').style.display='';
-    $('addBox').open=true;$('sName').scrollIntoView({block:'center'})}
+    $('formTitle').textContent='編輯中：'+s.name;$('addBox').open=true;renderDays();$('sName').scrollIntoView({block:'center'})}
   else if(ph){phTarget=ph.dataset.ph;$('phFile').value='';$('phFile').click()}
 };
 
