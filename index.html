@@ -170,6 +170,17 @@ body.kind-tw .abOnly{display:none!important}
 .ps{margin-top:8px}.ps .pi{padding:9px 10px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;cursor:pointer;background:var(--card)}.ps .pi b{display:block;font-size:15px}.ps .pi span{font-size:12px;color:var(--mute)}
 .kseg{margin:0 0 10px}
 .homebtn{position:absolute;right:14px;bottom:46px;z-index:2;background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.55);padding:6px 12px;font-size:13px;border-radius:999px;box-shadow:none}
+.postcard{background:linear-gradient(135deg,var(--acc2),var(--card))!important}
+#thSheet{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+#thSheet.hidden{display:none}
+.thc{width:100%;max-width:560px;margin:0 auto;background:var(--card);border-radius:24px 24px 0 0;padding:18px 18px 28px;box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+.thc>div>b{font:700 18px var(--serif);color:var(--acc)}
+.thg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.thb{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:16px;padding:12px 4px;font-size:13px;font-weight:600;box-shadow:none}
+.thb i{width:38px;height:38px;border-radius:50%;display:block;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.thb.on{border-color:var(--acc);background:var(--acc2)}
+.homebtn.tb{right:96px}
+body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,body.compact .hero .sub{display:none}body.compact h1{font-size:22px}body.compact .homebtn{bottom:12px}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -180,7 +191,7 @@ body.kind-tw .abOnly{display:none!important}
   <div class="eyebrow">TRAVEL JOURNAL · 旅遊手帳</div>
   <h1 id="title">我的旅程手帳</h1>
   <div class="sub" id="subtitle">先設定旅程，再安排每天的行程</div>
-</div><button id="homeBtn" class="homebtn">🏠 首頁</button></header>
+</div><button id="themeBtn" class="homebtn tb">🎨 風格</button><button id="homeBtn" class="homebtn">🏠 首頁</button></header>
 
 <main class="wrap">
   <!-- 行程 -->
@@ -247,7 +258,7 @@ body.kind-tw .abOnly{display:none!important}
     </div>
 
     <div class="card" id="lgCard">
-      <b><span class="step">3</span>住宿</b>
+      <b><span class="step" id="lgStep">3</span>住宿</b>
       <div class="row"><div><label>晚數（留空＝依日期自動算）</label><input id="lgNights" type="number" min="0" inputmode="numeric" placeholder="自動"></div>
         <div><label>每晚價格</label><input id="lgPrice" type="number" inputmode="decimal" placeholder="0"></div></div>
       <div class="note" id="lgSum" style="margin:8px 0"></div>
@@ -374,7 +385,7 @@ body.kind-tw .abOnly{display:none!important}
   <section id="tab-budget" class="hidden">
     <div class="card">
       <b>💰 總預算</b>
-      <div class="row"><div style="flex:.45"><label>幣別符號</label><input id="bCur" placeholder="NT$"></div><div><label>總預算（金額）</label><input id="tBudget" type="number" inputmode="decimal" placeholder="50000"></div></div>
+      <div class="row"><div style="flex:.45" class="abOnly"><label>幣別符號</label><input id="bCur" placeholder="NT$"></div><div><label>總預算（金額）</label><input id="tBudget" type="number" inputmode="decimal" placeholder="50000"></div></div>
       <div class="grid3" style="margin-top:14px"><div><small>已規劃</small><b id="bSpent">0</b></div><div><small>剩餘</small><b id="bLeft">0</b></div><div><small>每日平均</small><b id="bDaily">0</b></div></div>
       <div class="bar" id="bBar" style="margin-top:12px"><i style="width:0"></i></div>
       <div class="note" id="bHint"></div>
@@ -445,7 +456,7 @@ body.kind-tw .abOnly{display:none!important}
         <div class="row" style="margin-top:6px"><input id="wsText" placeholder="想買什麼？例如：抹茶、藥妝"><button id="wsAdd" style="flex:none">加入</button></div>
         <div id="wsList"></div>
       </div>
-      <div class="card">
+      <div class="card abOnly">
         <b>🛃 帶回台灣要注意</b>
         <ul class="note" style="padding-left:18px;margin:6px 0">
           <li>酒類每人 1 公升以內、捲菸 200 支以內（限成年），入境行李總價值在新台幣 2 萬元內免稅，超過要申報（以海關公告為準）。</li>
@@ -550,6 +561,12 @@ body.kind-tw .abOnly{display:none!important}
     </div>
   </div>
 </div>
+<div id="thSheet" class="hidden"><div class="thc">
+  <div style="display:flex;justify-content:space-between;align-items:center"><b>🎨 介面風格</b><button class="x" id="thClose">完成</button></div>
+  <div class="thg" id="thGrid"></div>
+  <div class="note" style="margin:10px 0 4px">明暗模式</div>
+  <div class="seg" id="thMode"><button data-m="auto">跟隨手機</button><button data-m="light">☀️ 淺色</button><button data-m="dark">🌙 深色</button></div>
+</div></div>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='trip-planner-v2';
@@ -851,6 +868,7 @@ const TABS=['trip','plan','explore','budget','pack','data'];
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   TABS.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.t));
+  document.body.classList.toggle('compact',b.dataset.t!=='trip');
   window.scrollTo(0,0);
   setTimeout(()=>Object.values(maps).forEach(m=>m.map.invalidateSize()),80);
 });
@@ -1185,7 +1203,7 @@ $('eList').onclick=e=>{
 function addPack(t){t=t.trim();if(t&&!S.pack.some(p=>p.text===t))S.pack.push({id:uid(),text:t,done:false})}
 $('pAdd').onclick=()=>{addPack($('pText').value);$('pText').value='';save();renderPack()};
 $('pText').addEventListener('keydown',e=>{if(e.key==='Enter')$('pAdd').click()});
-$('pPreset').onclick=()=>{['護照／身分證','機票與訂房憑證','手機與充電器','行動電源','轉接頭','信用卡與現金','換洗衣物','盥洗用品','常備藥品','雨具','防曬用品','旅遊保險'].forEach(addPack);save();renderPack()};
+$('pPreset').onclick=()=>{(S.kind==='tw'?['身分證／健保卡','訂房與訂位憑證','手機與充電器','行動電源','悠遊卡／現金','換洗衣物','盥洗用品','常備藥品','雨具','防曬用品','高鐵／台鐵車票']:['護照／身分證','機票與訂房憑證','手機與充電器','行動電源','轉接頭','信用卡與現金','換洗衣物','盥洗用品','常備藥品','雨具','防曬用品','旅遊保險']).forEach(addPack);save();renderPack()};
 $('pList').onclick=e=>{if(e.target.dataset.px){S.pack=S.pack.filter(p=>p.id!==e.target.dataset.px);save();renderPack()}};
 $('pList').onchange=e=>{const id=e.target.dataset.p;if(id){S.pack.find(p=>p.id===id).done=e.target.checked;save();renderPack()}};
 
@@ -1315,6 +1333,7 @@ const AIR={
 };
 const LV_TIP={low:'省錢：先比較「含行李、餐點、選位」後的總價，廉航常另外收費；也留意是否使用不同航廈或機場。',mid:'一般：兼顧價格與便利，建議比較含 20kg 託運行李的總價，並避開太早或太晚、轉機等待過長的班次。',high:'寬鬆：優先直飛與全服務航空，可比較商務艙／豪華經濟艙價差，也可選擇好時段的班次。'};
 const ymd=t=>t?t.replace(/-/g,'').slice(2):'';
+const catsK=()=>S.kind==='tw'?CATS.filter(c=>c[0]!=='flight'):CATS;
 const CATS=[['flight','機票','✈️'],['lodging','住宿','🛏'],['food','餐飲','🍜'],['transport','交通','🚆'],['sight','景點門票','🎟'],['shop','購物','🛍'],['other','其他','📌']];
 const CAT_OF={'景點':'sight','餐飲':'food','交通':'transport','住宿':'lodging','購物':'shop','其他':'other'};
 const SUG={flight:.30,lodging:.25,food:.20,transport:.08,sight:.07,shop:.07,other:.03};
@@ -1345,6 +1364,8 @@ function renderDest(){
   document.body.classList.toggle('kind-tw',S.kind==='tw');
   document.querySelectorAll('#kSeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===S.kind));
   $('tDest').placeholder=S.kind==='tw'?'台南':'東京';
+  $('lgStep').textContent=S.kind==='tw'?'2':'3';
+  {const cur=$('xpCat').value;$('xpCat').innerHTML=catsK().map(([k,l,em])=>`<option value="${k}">${em} ${l}</option>`).join('');if(catsK().some(c=>c[0]===cur))$('xpCat').value=cur}
 }
 $('kSeg').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b||S.kind===b.dataset.k)return;S.kind=b.dataset.k;if(S.kind==='tw')S.cur='NT$';dReg=kindRG()[0][0];save();renderAll()});
 $('rChips').onclick=e=>{const b=e.target.closest('[data-rg]');if(b){dReg=b.dataset.rg;renderDest()}};
@@ -1441,9 +1462,9 @@ function renderBudget(){
   const pct=budget?Math.min(100,spent/budget*100):0;
   $('bBar').className='bar'+(budget&&spent>budget?' over':'');$('bBar').firstElementChild.style.width=pct+'%';
   $('bHint').textContent=!budget?'先在上面填總預算（金額），就能看到進度':spent>budget?'已超出預算 '+money(spent-budget):'已使用 '+pct.toFixed(0)+'%，剩 '+money(budget-spent);
-  const sumAl=CATS.reduce((a,[k])=>a+(+S.alloc[k]||0),0);
+  const sumAl=catsK().reduce((a,[k])=>a+(+S.alloc[k]||0),0);
   $('bAllocNote').innerHTML=!budget?'設定總預算後，可按「依建議比例分配」，再依需要微調每個分類的上限。':`已分配 ${money(sumAl)} ／ 總預算 ${money(budget)}，${sumAl>budget?`<span style="color:var(--warn)">超出 ${money(sumAl-budget)}</span>`:`未分配 ${money(budget-sumAl)}`}`;
-  $('bCats').innerHTML=CATS.map(([k,l,em])=>{
+  $('bCats').innerHTML=catsK().map(([k,l,em])=>{
     const p=pl[k]||0,al=+S.alloc[k]||0,over=al&&p>al,w=al?Math.min(100,p/al*100):(p?100:0);
     return `<div class="bc"><div class="bch"><span>${em} <b>${l}</b></span><span><b>${money(p)}</b></span></div><div class="bar ${over?'over':''}" style="margin:6px 0 4px"><i style="width:${w}%"></i></div><div class="bcf"><span class="note">上限</span><input type="number" inputmode="decimal" data-al="${k}" value="${al||''}" placeholder="0"><span class="note" style="${over?'color:var(--warn)':''}">${al?(over?'超出 '+money(p-al):'剩 '+money(al-p)):'未設定上限'}</span></div></div>`;
   }).join('');
@@ -1455,7 +1476,7 @@ function renderBudget(){
 $('bCats').onchange=e=>{const k=e.target.dataset.al;if(!k)return;S.alloc[k]=+e.target.value||0;save();renderBudget();renderQuotes()};
 $('bAuto').onclick=()=>{
   const b=+S.trip.budget||0;if(!b){toast('請先填總預算');$('tBudget').focus();return}
-  let used=0;CATS.forEach(([k],i)=>{const v=i===CATS.length-1?b-used:Math.round(b*SUG[k]/100)*100;S.alloc[k]=Math.max(v,0);used+=S.alloc[k]});
+  let used=0;catsK().forEach(([k],i)=>{const v=i===catsK().length-1?b-used:Math.round(b*SUG[k]/100)*100;S.alloc[k]=Math.max(v,0);used+=S.alloc[k]});
   save();renderBudget();renderQuotes();toast('已依建議比例分配（機票 30%、住宿 25%、餐飲 20%…），可再微調');
 };
 $('xpCat').innerHTML=CATS.map(([k,l,em])=>`<option value="${k}">${em} ${l}</option>`).join('');
@@ -1668,7 +1689,7 @@ async function tripWeather(c){
 
 function buildTips(w){
   const out={doc:[],plan:[],weather:[],place:[],culture:[],money:[],power:[],transport:[],safe:[]},pk=new Set(),stats=[];
-  const dest=(S.trip.dest||'').trim(),ct=ctryOf(dest),tw=isTW(dest),nd=numDays(),add=(c,t,warn)=>out[c].push({t,warn:!!warn}),pp=a=>(a||[]).forEach(x=>pk.add(x));
+  const dest=(S.trip.dest||'').trim(),ct=S.kind==='tw'?null:ctryOf(dest),tw=S.kind==='tw'||(S.kind!=='abroad'&&isTW(dest)),nd=numDays(),add=(c,t,warn)=>out[c].push({t,warn:!!warn}),pp=a=>(a||[]).forEach(x=>pk.add(x));
   if(!dest)add('plan','尚未設定目的地，先到「出發」選好目的地，建議會更準。',true);
   if(!S.trip.start)add('plan','尚未設定出發與回程日期，天氣與休館日建議會少一些。');
   if(ct){
@@ -1840,10 +1861,36 @@ const MB_X={
  '吉隆坡':[['雙子星塔與茨廠街紀念品','雜貨','白咖啡、錫器、燕窩。']],
  '新加坡':[['ION 與烏節路精品','雜貨','要留意 GST 退稅條件。']]
 };
+
+const MB_TW={
+ '台北':[['鳳梨酥與太陽餅','食品','微熱山丘、一之軒、佳德等，都是送禮首選。'],['牛軋糖與手工餅乾','食品','迪化街、永康街一帶有許多老字號。'],['茶葉與茶具','雜貨','貓空與迪化街的茶行，可請店家依預算推薦。'],['文創小物','雜貨','松菸、華山、故宮周邊有設計師選品。']],
+ '新北':[['淡水阿給與魚酥','食品','淡水老街的魚酥、鐵蛋是經典伴手禮。'],['鶯歌陶瓷','雜貨','鶯歌老街的陶瓷杯盤與擺飾。'],['九份芋圓與茶葉','食品','九份、平溪一帶的特產。']],
+ '基隆':[['廟口奶油酥餅','食品','基隆夜市的招牌伴手禮。'],['李鵠餅店鳳梨酥','食品','基隆老字號餅店。']],
+ '桃園':[['大溪豆干','食品','大溪老街的黃日香、廖心蘭等老字號。'],['石門活魚周邊與茶','食品','桃園在地茶品與農產。']],
+ '新竹':[['新竹貢丸與米粉','食品','新竹城隍廟周邊最有名，也有真空包裝。'],['柿餅','食品','新埔柿餅是秋冬限定。'],['玻璃工藝','雜貨','新竹玻璃工藝博物館的紀念品。']],
+ '宜蘭':[['牛舌餅與糕渣','食品','宜蘭餅、羊羹，也很適合送人。'],['鴨賞與膽肝','食品','宜蘭特色的鴨賞，記得看保存期限。'],['蔥油餅與三星蔥','食品','三星蔥製品與蔥油餅。']],
+ '苗栗':[['客家擂茶與麻糬','食品','客家特色的擂茶粉與麻糬。'],['三義木雕','雜貨','三義木雕街的木雕與文創。']],
+ '台中':[['太陽餅','食品','太陽堂、阿聰師、林金生等老店。'],['鳳梨酥與宮原眼科冰淇淋','食品','宮原眼科、日出集團的伴手禮盒。'],['台灣啤酒與文創','雜貨','審計新村、勤美草悟道有文創小物。']],
+ '彰化':[['鹿港牛舌餅與蝦猴','食品','鹿港老街的牛舌餅、蝦猴與傳統糕點。'],['田尾花卉','雜貨','田尾公路花園的盆栽與花器。']],
+ '南投':[['日月潭紅茶與魚池茶','食品','阿薩姆紅茶、紅玉紅茶是名產。'],['埔里紹興酒製品與酒釀','食品','紹興酒、酒釀餅乾，需成年。'],['清境與合歡山特產','食品','高山茶、蜂蜜。']],
+ '雲林':[['斗六文旦與古坑咖啡','食品','古坑咖啡豆是在地特產。'],['西螺醬油','食品','西螺的老字號醬油與醬瓜。']],
+ '嘉義':[['火雞肉飯醬與雞肉絲','食品','嘉義火雞肉飯店的調理包或醬。'],['檜意森活村與阿里山茶','食品','阿里山高山茶是名產。']],
+ '台南':[['蝦餅與鳳梨酥','食品','小北成功蝦餅、連得堂餅家、舊永宜餅店。'],['蜜餞與黑糖糕','食品','國華街、神農街一帶的蜜餞老店。'],['擔仔麵與鴨蛋酥','食品','度小月與在地小吃的真空包，也可買配料。'],['台南文創小物','雜貨','林百貨、藍晒圖有選物。']],
+ '高雄':[['海產乾貨與黑鮪魚製品','食品','旗津、鹽埕一帶的乾貨。'],['義大利麵醬與岡山羊肉乾','食品','岡山羊肉乾要看保存期限。'],['駁二文創','雜貨','駁二藝術特區的設計小物。']],
+ '屏東':[['萬巒豬腳與蓮霧','食品','季節性水果要注意運送。'],['墾丁紀念品與貝殼飾品','雜貨','恆春古城、墾丁大街的店。']],
+ '墾丁':[['洋蔥與瑪卡製品','食品','恆春半島的洋蔥是特產。'],['貝殼飾品與海洋文創','雜貨','墾丁大街與海生館周邊。']],
+ '花蓮':[['曾記麻糬與花蓮薯','食品','曾記、公正包子、液香扁食都是名物。'],['原住民手工藝','雜貨','玉里、光復一帶的織品與木雕。'],['花蓮玉石與文創','雜貨','花蓮的玉石製品，要看信譽。']],
+ '台東':[['池上米與鹿野紅烏龍','食品','池上米與紅烏龍茶是代表。'],['釋迦與洛神','食品','季節性水果與洛神花製品。'],['卑南族與阿美族手工藝','雜貨','台東的原住民手工藝品。']],
+ '澎湖':[['黑糖糕與小管乾','食品','澎湖名物，注意保存與包裝。'],['仙人掌冰與天人菊文創','雜貨','在地文創。'],['海產干貨','食品','澎湖的小卷乾與丁香魚。']],
+ '金門':[['貢糖與高粱酒','食品','金門貢糖、一條根。'],['金門菜刀與特色紀念品','雜貨','菜刀屬刀具，搭機需託運。']],
+ '馬祖':[['老酒與魚麵','食品','馬祖老酒、魚麵、淡菜。'],['藍眼淚與海洋文創','雜貨','馬祖文創小物。']]
+};
+const MB_TW_GEN=[['在地小吃與特產','食品','到當地的夜市、農會、老街找，通常有最道地的選擇。'],['在地茶、水果與農產','食品','依季節挑選，注意保存與運送。']];
 const BUY_TYPES=[['pharm','藥妝','node["shop"~"^(chemist|cosmetics|beauty)$"]'],['gift','伴手禮','node["shop"~"^(gift|souvenir|confectionery|tea|chocolate)$"]'],['dept','百貨商場','nwr["shop"~"^(department_store|mall)$"]'],['super','超市','nwr["shop"="supermarket"]'],['duty','免稅店','nwr["shop"="duty_free"]'],['mkt','市集','nwr["amenity"="marketplace"]']];
 let buyType='pharm',buyRes=[];
 function mbFor(dest){
   const d=(dest||'').trim();if(!d)return null;
+  if(S.kind==='tw'){const k=Object.keys(MB_TW).find(k=>d.includes(k)||k.includes(d));return{ct:null,items:(k?MB_TW[k]:[]).concat(k?[]:MB_TW_GEN)}}
   const hit=Object.keys(MB_X).find(k=>d.includes(k)||k.includes(d));
   const ct=ctryOf(d);
   const base=ct?(MB_C[ct.k]||[]):[];
@@ -1852,7 +1899,7 @@ function mbFor(dest){
 }
 function renderBuy(){
   const d=(S.trip.dest||'').trim();
-  $('byTypes').innerHTML=BUY_TYPES.map(([k,l])=>`<button class="chip ${buyType===k?'on':''}" data-by="${k}">${l}</button>`).join('');
+  $('byTypes').innerHTML=BUY_TYPES.filter(t=>!(S.kind==='tw'&&t[0]==='duty')).map(([k,l])=>`<button class="chip ${buyType===k?'on':''}" data-by="${k}">${l}</button>`).join('');
   if(!d){$('byHead').textContent='先在「出發」設定目的地，這裡會列出當地必買。';$('byList').innerHTML='';return}
   const r=mbFor(d);
   if(!r){$('byHead').textContent='內建資料裡沒有「'+d+'」，可以用下面的搜尋工具找當地特產與商店。';$('byList').innerHTML='';return}
@@ -1951,9 +1998,48 @@ $('hmGo').onclick=()=>{
   toast('已建立「'+dest+'」，到「探索」找景點，或直接在這裡新增');
 };
 $('homeBtn').onclick=hmShow;
-if(!S.kind&&S.trip.dest)S.kind=TW_RE.test(S.trip.dest)?'tw':'abroad';
+if(!S.kind&&S.trip.dest){const d=S.trip.dest;S.kind=(ctryOf(d)||DEST.some(x=>x[0]===d)||/日本|韓國|泰國|越南|美國|歐洲/.test(d))?'abroad':'tw'}
 
 $('heroArt').innerHTML=SCENE;
+/* ---------- 介面風格 ---------- */
+const THEMES={
+ paper:{n:'旅遊手帳',sw:['#0e5f6b','#e2704f'],hue:'none',
+  l:{'--bg':'#f5efe3','--card':'#fffaf0','--ink':'#2b2a28','--mute':'#7a7266','--line':'#e6dcc8','--acc':'#0e5f6b','--acc2':'#e1eee9','--warm':'#e2704f','--warn':'#c2410c','--onacc':'#ffffff'},
+  d:{'--bg':'#121c1b','--card':'#1b2a29','--ink':'#f1e9d8','--mute':'#a39a88','--line':'#2f4241','--acc':'#5fd0c4','--acc2':'#1f3a38','--warm':'#ff8a6b','--warn':'#fb923c','--onacc':'#0b2623'}},
+ ocean:{n:'海島藍',sw:['#1366a6','#f08a4b'],hue:'hue-rotate(22deg) saturate(1.1)',
+  l:{'--bg':'#eaf3f9','--card':'#fbfdff','--ink':'#1f2a36','--mute':'#66788a','--line':'#d3e2ee','--acc':'#1366a6','--acc2':'#e0eefb','--warm':'#ee8346','--warn':'#c2410c','--onacc':'#ffffff'},
+  d:{'--bg':'#0f1822','--card':'#172431','--ink':'#e7eef6','--mute':'#8fa2b5','--line':'#27394a','--acc':'#6cb6f2','--acc2':'#1b3347','--warm':'#ffa266','--warn':'#fb923c','--onacc':'#08202f'}},
+ forest:{n:'森林綠',sw:['#2f6b3f','#d9822b'],hue:'hue-rotate(-38deg)',
+  l:{'--bg':'#f0f2e6','--card':'#fbfcf3','--ink':'#272b24','--mute':'#6f7766','--line':'#dce1cb','--acc':'#2f6b3f','--acc2':'#e2eedc','--warm':'#d9822b','--warn':'#b45309','--onacc':'#ffffff'},
+  d:{'--bg':'#111a13','--card':'#1a281d','--ink':'#e9f0e3','--mute':'#9aa890','--line':'#2b402f','--acc':'#7fd18f','--acc2':'#1f3925','--warm':'#f0a45a','--warn':'#fb923c','--onacc':'#0a2210'}},
+ sakura:{n:'櫻花粉',sw:['#b0456b','#e8836b'],hue:'hue-rotate(135deg) saturate(.9)',
+  l:{'--bg':'#fbf0f0','--card':'#fffafa','--ink':'#2e2426','--mute':'#7f6d70','--line':'#f0d8dc','--acc':'#b0456b','--acc2':'#fbe3ea','--warm':'#e8836b','--warn':'#c2410c','--onacc':'#ffffff'},
+  d:{'--bg':'#1d1416','--card':'#2a1d20','--ink':'#f6e9eb','--mute':'#b09a9e','--line':'#43292f','--acc':'#f08fb0','--acc2':'#40242c','--warm':'#ff9c85','--warn':'#fb923c','--onacc':'#33101b'}},
+ mono:{n:'極簡黑白',sw:['#222222','#c0392b'],hue:'grayscale(1)',
+  l:{'--bg':'#f5f5f4','--card':'#ffffff','--ink':'#161616','--mute':'#707070','--line':'#dedede','--acc':'#222222','--acc2':'#ececec','--warm':'#c0392b','--warn':'#b91c1c','--onacc':'#ffffff'},
+  d:{'--bg':'#111111','--card':'#1b1b1b','--ink':'#eeeeee','--mute':'#9a9a9a','--line':'#2e2e2e','--acc':'#f2f2f2','--acc2':'#2a2a2a','--warm':'#ff7a66','--warn':'#fb923c','--onacc':'#111111'}}
+};
+let TH={t:'paper',m:'auto'};
+try{const r=JSON.parse(localStorage.getItem('trip-theme')||'null');if(r&&THEMES[r.t])TH={t:r.t,m:['auto','light','dark'].includes(r.m)?r.m:'auto'}}catch(e){}
+const sysDark=()=>window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches;
+function applyTheme(){
+  const dark=TH.m==='dark'||(TH.m==='auto'&&sysDark()),T=THEMES[TH.t],v=dark?T.d:T.l,st=document.documentElement.style;
+  Object.keys(v).forEach(k=>st.setProperty(k,v[k]));
+  document.documentElement.style.colorScheme=dark?'dark':'light';
+  $('heroArt').style.filter=T.hue;
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=v['--acc'];
+  try{localStorage.setItem('trip-theme',JSON.stringify(TH))}catch(e){}
+  $('thGrid').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="thb ${TH.t===k?'on':''}" data-th="${k}"><i style="background:linear-gradient(135deg,${t.sw[0]} 55%,${t.sw[1]} 55%)"></i>${t.n}</button>`).join('');
+  document.querySelectorAll('#thMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===TH.m));
+}
+$('thGrid').onclick=e=>{const b=e.target.closest('[data-th]');if(b){TH.t=b.dataset.th;applyTheme()}};
+$('thMode').onclick=e=>{const b=e.target.closest('[data-m]');if(b){TH.m=b.dataset.m;applyTheme()}};
+$('themeBtn').onclick=()=>$('thSheet').classList.remove('hidden');
+$('thClose').onclick=()=>$('thSheet').classList.add('hidden');
+$('thSheet').onclick=e=>{if(e.target===$('thSheet'))$('thSheet').classList.add('hidden')};
+if(window.matchMedia)try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(TH.m==='auto')applyTheme()})}catch(e){}
+
+applyTheme();
 syncExtra();
 resetForm();
 renderAll();
