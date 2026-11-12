@@ -181,7 +181,9 @@ body.kind-tw .abOnly{display:none!important}
 .thb.on{border-color:var(--acc);background:var(--acc2)}
 .homebtn.tb{right:96px}
 body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,body.compact .hero .sub{display:none}body.compact h1{font-size:22px}body.compact .homebtn{bottom:12px}
+#fxModal{position:fixed;inset:0;z-index:86;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#fxModal.hidden{display:none}#fxSkip{white-space:nowrap;flex:none;font-size:13px}#fxModal .pkc b{font:700 16px var(--serif);color:var(--acc)}
 #pkModal{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#pkModal.hidden{display:none}.pkc{width:100%;max-width:560px;background:var(--card);border-radius:20px;padding:14px}#pkMapEl{height:56vh;border-radius:14px;margin:8px 0;z-index:0}
+.fixb{color:var(--warn)!important;font-size:12px;padding:2px 6px!important;border:1px dashed var(--warn)!important;border-radius:8px;margin-left:6px}
 .stay{white-space:nowrap;font-size:12.5px;color:var(--mute);margin-top:3px}.stay select{padding:2px 6px;font-size:12.5px;border-radius:8px;width:auto;display:inline-block;background:var(--acc2);border:1px solid var(--line);color:var(--ink)}
 .leg .lt{flex-basis:100%;font-size:12.5px;color:var(--mute)}.leg .lt a.lnk{margin:0 6px 0 0}.steps{flex-basis:100%;font-size:12.5px;color:var(--ink);display:grid;gap:3px;padding-top:4px;border-top:1px dashed var(--line)}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
@@ -575,6 +577,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
   <div class="seg" id="thMode"><button data-m="auto">跟隨手機</button><button data-m="light">☀️ 淺色</button><button data-m="dark">🌙 深色</button></div>
 </div></div>
 <div id="pkModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center"><b>📍 點選位置</b><button class="x" id="pkCancel">取消</button></div><div id="pkMapEl"></div><div class="note" id="pkMsg"></div><button id="pkOk" style="width:100%;margin-top:8px">確定</button></div></div>
+<div id="fxModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="fxT"></b><button class="x" id="fxSkip">略過</button></div><div class="note" id="fxN" style="margin:4px 0 6px"></div><div class="ps" id="fxList" style="max-height:40vh;overflow:auto"></div><button class="ghost" id="fxMap" style="width:100%;margin-top:6px">📍 我自己在地圖上點選</button><button class="x" id="fxSkipAll" style="width:100%;margin-top:4px">之後再處理（全部略過）</button></div></div>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='trip-planner-v2';
@@ -749,7 +752,7 @@ async function autoLocate(){
         if(hit){st.lat=hit.lat;st.lng=hit.lng;if(approx)st.approx=true;save();renderAll()}else renderDays()}catch(e){}
       await sleep(1100);
     }
-  }catch(e){}finally{locBusy=false}
+  }catch(e){}finally{locBusy=false;setTimeout(queueFix,400)}
 }
 async function overpass(q){
   const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:new URLSearchParams({data:q})});
@@ -861,7 +864,7 @@ function renderDays(){
       <div class="tcol">${s.time?`<b>${esc(s.time)}</b>`:'<b class="no">--:--</b>'}</div>
       <div class="thumb" data-ph="${s.id}">${s.photo?`<img src="${s.photo}" alt="">`:EMO[s.cat]}</div>
       <div class="grow">
-        <div class="nm"><b>${esc(s.name)}</b><a class="pin" data-gm="${esc(s.name)}" data-gmp="${esc(S.trip.dest||'')}" ${hasXY(s)?`data-lat="${s.lat}" data-lng="${s.lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.approx?'<span class="note"> ≈約略位置</span>':''}</div>
+        <div class="nm"><b>${esc(s.name)}</b><a class="pin" data-gm="${esc(s.name)}" data-gmp="${esc(S.trip.dest||'')}" ${hasXY(s)?`data-lat="${s.lat}" data-lng="${s.lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.approx?`<button class="x fixb" data-fix="${s.id}">≈ 約略位置・修正</button>`:(!hasXY(s)&&locTried.has(s.id)?`<button class="x fixb" data-fix="${s.id}">⚠ 未定位・修正</button>`:'')}</div>
         <div class="note one"><span class="tag">${esc(s.cat)}</span>${s.cost?fmt(s.cost)+' · ':''}${esc(s.note||s.desc||'')}</div>
         <div class="stay">⏱ 停留 <select class="ds" data-ds="${s.id}">${[...new Set([...(s.dur?[]:[0]),...DUR_OPTS,s.dur||0])].filter(x=>x>=0).sort((x,y)=>x-y).map(m=>m===0?`<option value="" ${!s.dur?'selected':''}>預估 ${durLabel(durOf(s))}</option>`:`<option value="${m}" ${s.dur===m?'selected':''}>${durLabel(m)}</option>`).join('')}</select>${tmin(s.time)!=null?`<span class="note"> → ${tfrom(Math.min(tmin(s.time)+durOf(s),1439))} 結束</span>`:''}</div>
       </div>
@@ -930,14 +933,63 @@ async function openPick(){
   setTimeout(()=>pkMapObj.invalidateSize(),80);
   pkPt=null;if(pkMk){pkMapObj.removeLayer(pkMk);pkMk=null}
   $('pkMsg').textContent='點地圖上的位置；可放大縮小。';
-  const cur=editId&&S.stops.find(x=>x.id===editId);
+  const tgt=pkTarget&&S.stops.find(x=>x.id===pkTarget),cur=tgt||(editId&&S.stops.find(x=>x.id===editId));
   try{
     if(cur&&hasXY(cur))pkMapObj.setView([cur.lat,cur.lng],17);
-    else{const q=$('sName').value.trim(),d=(S.trip.dest||'').trim(),c=d?await geocodeCached(d):null;
+    else{const q=tgt?tgt.name:$('sName').value.trim(),d=(S.trip.dest||'').trim(),c=d?await geocodeCached(d):null;
       if(c)pkMapObj.setView([c.lat,c.lng],14);
       if(q&&c){const r=await geocodeNear(q+' '+d,c);if(r[0])pkMapObj.setView([r[0].lat,r[0].lng],17)}}
   }catch(e){}
 }
+
+/* ---------- 找不到位置時的提醒 ---------- */
+let fxQueue=[],fxCur=null,fxCands=[],pkTarget=null;const fixAsked=new Set();
+function queueFix(){
+  S.stops.forEach(s=>{if(fixAsked.has(s.id))return;if((!hasXY(s)&&locTried.has(s.id))||s.approx){fixAsked.add(s.id);fxQueue.push(s.id)}});
+  nextFix();
+}
+function nextFix(){
+  if(fxCur||!fxQueue.length)return;
+  if(!$('home').classList.contains('hidden')||!$('pkModal').classList.contains('hidden')){setTimeout(nextFix,1500);return}
+  const id=fxQueue.shift();if(!S.stops.some(x=>x.id===id)){nextFix();return}
+  openFix(id);
+}
+async function geocodeLoose(s){
+  const dest=(S.trip.dest||'').trim(),c=dest?await geocodeCached(dest):null;
+  const n=s.name,qs=[...new Set([n,n.replace(/\d+之?\d*號.*$/,''),n.replace(/\d+弄.*$/,''),n.replace(/\d+巷.*$/,'')].map(x=>x.trim()).filter(x=>x.length>=2))].slice(0,3);
+  const out=[];
+  for(let i=0;i<qs.length;i++){
+    try{const a=await geocodeNear(qs[i]+(dest&&!qs[i].includes(dest)?' '+dest:''),c);out.push(...a)}catch(e){}
+    try{const b=await photonSearch(qs[i],c);out.push(...b)}catch(e){}
+    if(i<qs.length-1)await sleep(900);
+  }
+  const seen=new Set();
+  return out.map(r=>({...r,d:c?distKm(c,r):0})).filter(r=>!seen.has(r.name+r.lat.toFixed(3)+r.lng.toFixed(3))&&seen.add(r.name+r.lat.toFixed(3)+r.lng.toFixed(3))).sort((x,y)=>x.d-y.d).slice(0,6);
+}
+async function openFix(id){
+  const s=S.stops.find(x=>x.id===id);if(!s)return;
+  fxCur=id;
+  $('fxT').textContent=hasXY(s)?`只找到「${s.name}」的大概位置`:`找不到「${s.name}」的準確位置`;
+  $('fxN').textContent='請選最可能的地點，或自己在地圖上點選更精確的位置。';
+  $('fxSkip').textContent=hasXY(s)?'接受目前位置':'略過';
+  $('fxList').innerHTML='<div class="note">搜尋可能的地點中…</div>';
+  $('fxModal').classList.remove('hidden');
+  try{
+    fxCands=await geocodeLoose(s);
+    $('fxList').innerHTML=(hasXY(s)?`<div class="pi" data-fc="cur"><b>目前的大概位置</b><span>街道層級，可能差幾十到幾百公尺</span></div>`:'')+
+      (fxCands.length?fxCands.map((r,i)=>`<div class="pi" data-fc="${i}"><b>${esc(r.name)}</b><span>${esc(r.addr)}${r.d?' · 距目的地中心 '+(r.d<1?Math.round(r.d*1000)+' m':r.d.toFixed(1)+' km'):''}</span> <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lng}" onclick="event.stopPropagation()">用 Google 地圖確認</a></div>`).join(''):'<div class="note">沒有找到相近的地點，請用下方「在地圖上點選」。</div>');
+  }catch(e){$('fxList').innerHTML='<div class="note">'+esc(netMsg(e))+'　可以直接用地圖點選。</div>'}
+}
+function closeFix(){fxCur=null;$('fxModal').classList.add('hidden');setTimeout(nextFix,400)}
+$('fxList').onclick=e=>{
+  const d=e.target.closest('[data-fc]');if(!d||!fxCur)return;const s=S.stops.find(x=>x.id===fxCur);if(!s)return;
+  if(d.dataset.fc!=='cur'){const r=fxCands[+d.dataset.fc];if(!r)return;s.lat=r.lat;s.lng=r.lng}
+  s.approx=false;save();renderAll();toast('已設定位置');closeFix();
+};
+$('fxSkip').onclick=()=>{const s=S.stops.find(x=>x.id===fxCur);if(s&&hasXY(s)){s.approx=false;save();renderDays()}closeFix()};
+$('fxSkipAll').onclick=()=>{fxQueue=[];const s=S.stops.find(x=>x.id===fxCur);if(s&&hasXY(s)){s.approx=false;save();renderDays()}closeFix()};
+$('fxMap').onclick=()=>{pkTarget=fxCur;$('fxModal').classList.add('hidden');openPick()};
+document.addEventListener('click',e=>{const f=e.target.closest('[data-fix]');if(!f)return;fxQueue=fxQueue.filter(x=>x!==f.dataset.fix);if(fxCur)return;openFix(f.dataset.fix)});
 
 /* ---------- Google 地圖資料（有金鑰時優先使用） ---------- */
 const GF_BASIC='places.id,places.displayName,places.formattedAddress,places.location,places.primaryTypeDisplayName,places.googleMapsUri',GF_RICH=GF_BASIC+',places.rating,places.userRatingCount';
@@ -1047,7 +1099,7 @@ function legHTML(a,b){
   let info,tl='';
   if(L){const d=L.km<1?Math.round(L.km*1000)+' m':L.km.toFixed(1)+' km';info=`<b>${MODE_NAME[mode]}約 ${L.min} 分</b><span>${L.walk?'步行即可 · ':''}${d} · ${L.src==='google'?'Google 路線':L.src==='osrm'?'實際路線':'估算'}</span>`;
     const ta=tmin(a.time);if(ta!=null){const dep=ta+durOf(a);tl=`<div class="lt">${MODE_ICON[mode]} ${tfrom(Math.min(dep,1439))} 出發 → ${tfrom(Math.min(dep+L.min,1439))} 抵達</div>`}}
-  else info=`<span>${locTried.has(a.id)&&!hasXY(a)||locTried.has(b.id)&&!hasXY(b)?'找不到位置，編輯時用「🔍 找地點」選':'位置查詢中…'}</span>`;
+  else{const bad=!hasXY(a)&&locTried.has(a.id)?a:(!hasXY(b)&&locTried.has(b.id)?b:null);info=bad?`<span>「${esc(bad.name.slice(0,10))}」找不到位置 <button class="x fixb" data-fix="${bad.id}">修正位置</button></span>`:'<span>位置查詢中…</span>'}
   let h=`<div class="leg"><div class="lm">${btn}</div><div class="li">${info}</div><a class="lnk" href="${url}" target="_blank" rel="noopener">路線›</a>${tl}`;
   if(mode==='transit'&&L){
     if(L.steps&&L.steps.length)h+=stepsHTML(L.steps);
@@ -1102,8 +1154,9 @@ $('psGo').onclick=async()=>{
 };
 $('psRes').onclick=e=>{const d=e.target.closest('[data-pi]');if(!d)return;const r=psList[+d.dataset.pi];if(!r)return;
   $('sName').value=r.name;picked={name:r.name,lat:r.lat,lng:r.lng};if(!$('sNote').value)$('sNote').value=r.addr;$('psRes').innerHTML='<div class="note">已選定位置 ✓</div>'};
-$('pkOpen').onclick=openPick;$('pkCancel').onclick=()=>$('pkModal').classList.add('hidden');
-$('pkOk').onclick=()=>{if(!pkPt){$('pkMsg').textContent='請先點選地圖上的位置';return}const nm=$('sName').value.trim()||'自訂位置';$('sName').value=nm;picked={name:nm,lat:pkPt.lat,lng:pkPt.lng,keep:true};$('psRes').innerHTML='<div class="note">已選定位置 ✓</div>';$('pkModal').classList.add('hidden')};
+$('pkOpen').onclick=openPick;$('pkCancel').onclick=()=>{$('pkModal').classList.add('hidden');if(pkTarget){const id=pkTarget;pkTarget=null;openFix(id)}};
+$('pkOk').onclick=()=>{if(!pkPt){$('pkMsg').textContent='請先點選地圖上的位置';return}
+  if(pkTarget){const st=S.stops.find(x=>x.id===pkTarget);pkTarget=null;if(st){st.lat=pkPt.lat;st.lng=pkPt.lng;st.approx=false;save();renderAll();toast('已設定位置')}$('pkModal').classList.add('hidden');closeFix();return}const nm=$('sName').value.trim()||'自訂位置';$('sName').value=nm;picked={name:nm,lat:pkPt.lat,lng:pkPt.lng,keep:true};$('psRes').innerHTML='<div class="note">已選定位置 ✓</div>';$('pkModal').classList.add('hidden')};
 $('sCancel').onclick=()=>{resetForm();renderDays()};
 $('sSave').onclick=()=>{
   const name=$('sName').value.trim();
