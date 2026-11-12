@@ -237,6 +237,10 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
         <select id="mode" style="flex:.6"><option value="transit">大眾運輸</option><option value="walking">步行</option><option value="driving">開車</option></select>
         <a id="routeLink" class="btn" href="#" target="_blank" rel="noopener">🗺 在 Google 地圖查看路線</a>
       </div>
+      <div id="chainBox" class="hidden" style="margin-top:10px">
+        <div class="row"><button class="ghost" id="chFill">⏱ 自動接續（只補空白時間）</button><button class="ghost" id="chAll">🔄 全部重算</button></div>
+        <div class="note" style="margin-top:6px">依上方選的交通方式估算點到點時間，再加上各點停留時間（沒選的以 1 小時計）。交通時間是用直線距離估算，實際請以 Google 地圖為準。</div>
+      </div>
     </div>
 
     <div class="card">
@@ -257,8 +261,9 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
       <b id="formTitle">新增景點／活動</b>
       <div class="row">
         <div style="flex:.6"><label>時間</label><input id="sTime" type="time"></div>
-        <div><label>名稱</label><input id="sName" placeholder="淺草寺"></div>
+        <div style="flex:.7"><label>停留（可不選）</label><select id="sDur"><option value="">不指定</option><option value="30">30 分</option><option value="45">45 分</option><option value="60">1 小時</option><option value="90">1.5 小時</option><option value="120">2 小時</option><option value="180">3 小時</option><option value="240">4 小時</option><option value="300">5 小時</option><option value="480">整天</option></select></div>
       </div>
+      <label>名稱</label><input id="sName" placeholder="淺草寺">
       <div class="row">
         <div><label>日期</label><select id="sDay"></select></div>
         <div><label>類別</label>
@@ -508,7 +513,7 @@ const WD=['日','一','二','三','四','五','六'];
 let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],fq:[],lodging:{nights:'',price:''},alloc:{},exp:[],cur:'NT$',tripType:'round',origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3},wish:[]};
 function normalize(o){
   const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],wish:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],fq:(o.fq||[]).filter(q=>q&&typeof q==='object').map(q=>({id:q.id||uid(),al:q.al||'',src:q.src||'其他',price:+q.price||0,bag:q.bag==='out'?'out':'in',fee:+q.fee||0,stop:['0','1','2'].includes(String(q.stop))?String(q.stop):'0',note:q.note||'',chosen:!!q.chosen})),lodging:Object.assign({nights:'',price:''},o.lodging||{}),alloc:Object.assign({},o.alloc||{}),exp:(o.exp||[]).filter(x=>x&&x.cat).map(x=>({id:x.id||uid(),cat:x.cat,amount:+x.amount||0,note:x.note||''})),cur:o.cur||'NT$',tripType:o.tripType==='one'?'one':'round',origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
-  (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
+  (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),dur:Math.max(0,Math.min(1440,+s.dur||0)),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
   (o.pack||[]).forEach(p=>{if(p&&p.text)r.pack.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   (o.wish||[]).forEach(p=>{if(p&&p.text)r.wish.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   return r;
@@ -722,7 +727,7 @@ function renderDays(){
   $('dayChips').innerHTML=Array.from({length:n},(_,i)=>`<button class="chip ${i===day?'on':''}" data-d="${i}">Day ${i+1}</button>`).join('');
   $('dayTitle').innerHTML=`<span class="dn">${String(day+1).padStart(2,'0')}</span><span class="dd">DAY · ${esc(dayLabel(day))}</span>`;
   const list=dayStops(day);
-  $('routeBox').classList.toggle('hidden',list.length<2);
+  $('routeBox').classList.toggle('hidden',list.length<2);$('chainBox').classList.toggle('hidden',list.length<1);
   if(list.length>=2){
     const mid=list.slice(1,-1).map(mapQ).join('%7C');
     $('routeLink').href='https://www.google.com/maps/dir/?api=1&origin='+mapQ(list[0])+'&destination='+mapQ(list[list.length-1])+(mid?'&waypoints='+mid:'')+'&travelmode='+$('mode').value;
@@ -732,11 +737,12 @@ function renderDays(){
       <div class="grip" title="拖曳排序">⠿</div>
       <div class="thumb" data-ph="${s.id}">${s.photo?`<img src="${s.photo}" alt="">`:EMO[s.cat]}</div>
       <div class="grow">
-        <div><span class="time">${i+1}. ${s.time||''}</span></div>
+        <div><span class="time">${i+1}. ${timeRange(s)}</span></div>
         <div><span class="tag">${esc(s.cat)}</span><b>${esc(s.name)}</b><a class="pin" data-gm="${esc(s.name)}" data-gmp="${esc(S.trip.dest||'')}" ${hasXY(s)?`data-lat="${s.lat}" data-lng="${s.lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.cost?` <span class="note">· ${fmt(s.cost)}</span>`:''}</div>
         ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
         ${s.desc?`<div class="note clamp">${esc(s.desc)}</div>`:''}
         ${s.photo?'':`<a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${mapQ(s)}">🔎 找參考照片</a>`}
+        ${legHTML(s,list[i+1])}
       </div>
       <div class="acts"><button class="x" data-e="${s.id}">編輯</button><button class="x" data-x="${s.id}">✕</button></div>
     </div>`).join(''):'<div class="empty">這天還沒有行程，從下方新增，或到「探索」找推薦</div>';
@@ -767,14 +773,69 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 
 /* ---------- 行程編輯 ---------- */
 $('mode').onchange=()=>{renderDays();renderMap()};
+/* ---------- 停留時間與點到點交通 ---------- */
+const tmin=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null};
+const tfrom=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+const DUR_DEF=60,MODE_ICON={transit:'🚇',walking:'🚶',driving:'🚗'},MODE_NAME={transit:'大眾運輸',walking:'步行',driving:'開車'};
+function setDur(v){v=+v||0;const sel=$('sDur');if(v&&![...sel.options].some(o=>+o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=v+' 分';sel.appendChild(o)}sel.value=v?String(v):''}
+function timeRange(s){
+  const a=tmin(s.time);if(a==null)return s.dur?'（停留 '+durText(s.dur)+'）':'';
+  return s.dur?`${s.time}–${tfrom(Math.min(a+s.dur,1439))}`:s.time;
+}
+const durText=m=>m>=60?(m%60?Math.floor(m/60)+' 小時 '+m%60+' 分':m/60+' 小時'):m+' 分';
+function legMin(a,b,mode){
+  if(!a||!b||!hasXY(a)||!hasXY(b))return null;
+  const km=distKm(a,b)*1.3;let m;
+  if(mode==='walking')m=km/4.5*60;
+  else if(mode==='driving')m=5+km/28*60;
+  else m=km<0.9?km/4.5*60:10+km/20*60;
+  return{min:Math.max(1,Math.round(m)),km:km,walk:mode==='transit'&&km<0.9};
+}
+function legHTML(a,b){
+  if(!b)return '';
+  const mode=$('mode').value,L=legMin(a,b,mode);
+  const url='https://www.google.com/maps/dir/?api=1&origin='+mapQ(a)+'&destination='+mapQ(b)+'&travelmode='+mode;
+  let h='<div class="note" style="margin-top:6px;border-top:1px dashed var(--line);padding-top:6px">';
+  if(L){
+    h+=`${L.walk?MODE_ICON.walking:MODE_ICON[mode]} 到下一站約 <b>${L.min} 分</b>（${L.walk?'很近，步行':MODE_NAME[mode]}，約 ${L.km<1?Math.round(L.km*1000)+' m':L.km.toFixed(1)+' km'}，估算）`;
+  }else h+=`${MODE_ICON[mode]} 到下一站：缺少位置資訊，無法估算`;
+  h+=` <a class="lnk" href="${url}" target="_blank" rel="noopener">看路線</a>`;
+  const ta=tmin(a.time),tb=tmin(b.time);
+  if(ta!=null&&tb!=null){
+    const end=ta+(a.dur||DUR_DEF),need=end+(L?L.min:0);
+    if(tb<need)h+=`<div class="mbw">⚠ 可能趕不及：前一站約 ${tfrom(Math.min(end,1439))} 結束${L?'，交通約 '+L.min+' 分，最快 '+tfrom(Math.min(need,1439))+' 到':''}，但下一站排 ${b.time}。</div>`;
+  }
+  return h+'</div>';
+}
+function chainDay(all){
+  const list=dayStops(day);if(!list.length)return;
+  const mode=$('mode').value,ceil5=n=>Math.ceil(n/5)*5;
+  let prevEnd=null,filled=0,over=false;
+  list.forEach((s,i)=>{
+    if(over)return;
+    if(i===0){
+      if(!s.time||all){const t=s.time&&!all?s.time:(i===0&&s.time?s.time:(S.auto&&S.auto.start)||'09:00');if(!s.time){s.time=t;filled++}}
+    }else{
+      const L=legMin(list[i-1],s,mode),t=ceil5(prevEnd+(L?L.min:15));
+      if(t>1439){over=true;return}
+      if(all||!s.time){if(s.time!==tfrom(t))filled++;s.time=tfrom(t)}
+    }
+    prevEnd=tmin(s.time)+(s.dur||DUR_DEF);
+  });
+  save();renderAll();
+  toast(over?'接續到半夜了，後面的行程請改天或縮短停留':filled?`已接續 ${filled} 個行程的時間`:'沒有需要補的時間');
+}
+$('chFill').onclick=()=>chainDay(false);
+$('chAll').onclick=()=>{if(confirm('會依順序重新計算這天所有行程的時間（第一個行程的時間保留），確定嗎？'))chainDay(true)};
+
 $('dayChips').onclick=e=>{const d=e.target.dataset.d;if(d!=null){day=+d;if(!editId)$('sDay').value=String(day);renderDays();renderMap()}};
-function resetForm(){editId=null;['sTime','sName','sCost','sNote'].forEach(i=>$(i).value='');$('sCat').value='景點';$('sDay').value=String(day);
+function resetForm(){editId=null;['sTime','sName','sCost','sNote','sDur'].forEach(i=>$(i).value='');$('sCat').value='景點';$('sDay').value=String(day);
   $('sSave').textContent='加入行程';$('formTitle').textContent='新增景點／活動';$('sCancel').style.display='none'}
 $('sCancel').onclick=resetForm;
 $('sSave').onclick=()=>{
   const name=$('sName').value.trim();
   if(!name){$('sName').focus();return}
-  const o={day:+$('sDay').value,time:$('sTime').value,name,cat:$('sCat').value,cost:+$('sCost').value||0,note:$('sNote').value.trim()};
+  const o={day:+$('sDay').value,time:$('sTime').value,dur:+$('sDur').value||0,name,cat:$('sCat').value,cost:+$('sCost').value||0,note:$('sNote').value.trim()};
   if(editId){const s=S.stops.find(x=>x.id===editId);if(s.name!==name){s.lat=null;s.lng=null}Object.assign(s,o)}
   else S.stops.push({id:uid(),desc:'',lat:null,lng:null,photo:'',...o});
   day=o.day;save();editId=null;resetForm();renderAll();
@@ -783,7 +844,7 @@ $('stops').onclick=e=>{
   const x=e.target.dataset.x,ed=e.target.dataset.e,ph=e.target.closest('[data-ph]');
   if(x){S.stops=S.stops.filter(s=>s.id!==x);save();renderAll()}
   else if(ed){const s=S.stops.find(v=>v.id===ed);editId=ed;
-    $('sTime').value=s.time;$('sName').value=s.name;$('sCat').value=s.cat;$('sCost').value=s.cost||'';$('sNote').value=s.note;$('sDay').value=String(s.day);
+    $('sTime').value=s.time;setDur(s.dur);$('sName').value=s.name;$('sCat').value=s.cat;$('sCost').value=s.cost||'';$('sNote').value=s.note;$('sDay').value=String(s.day);
     $('sSave').textContent='儲存修改';$('formTitle').textContent='編輯行程';$('sCancel').style.display='';
     $('sName').scrollIntoView({block:'center'})}
   else if(ph){phTarget=ph.dataset.ph;$('phFile').value='';$('phFile').click()}
