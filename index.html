@@ -119,6 +119,22 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 .clamp3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .revrow{margin-top:8px;display:flex;flex-wrap:wrap;gap:2px 0;align-items:center}
 .mapG{width:100%;height:340px;border:0;border-radius:14px;margin-top:8px;background:#e9e1cf}
+.seg{display:flex;background:var(--acc2);border-radius:16px;padding:4px;gap:4px;margin:10px 0}
+.seg button{flex:1;background:none;color:var(--mute);padding:8px 4px;border-radius:12px;font-size:14px;font-weight:600}
+.seg button.on{background:var(--card);color:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.route{display:flex;align-items:flex-end;gap:6px}
+.route>div{flex:1;min-width:0}
+.swap{flex:none;background:var(--acc2);color:var(--acc);padding:10px 12px;border-radius:12px;font-size:16px;margin-bottom:1px}
+.wrapchips{flex-wrap:wrap;overflow:visible}
+.step{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--warm);color:#fff;font:700 13px/24px var(--sans);justify-content:center;margin-right:8px;vertical-align:1px}
+.qc{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px;background:var(--bg)}
+.qc.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc2)}
+.qt{margin:4px 0;font-size:15px}
+.bc{padding:10px 0;border-bottom:1px dashed var(--line)}.bc:last-child{border:0}
+.bch{display:flex;justify-content:space-between;align-items:center}
+.bcf{display:flex;align-items:center;gap:8px;margin-top:2px}
+.bcf input{width:112px;padding:6px 8px}
+.refbox{background:var(--acc2);border-radius:14px;padding:12px}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -133,37 +149,79 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 
 <main class="wrap">
   <!-- 行程 -->
-  <section id="tab-plan">
+  <section id="tab-trip">
+    <div class="card">
+      <b><span class="step">1</span>要去哪裡？</b>
+      <label>旅程名稱</label><input id="tName" placeholder="例如：東京五日遊">
+      <div class="route" style="margin-top:6px">
+        <div><label>出發地</label><input id="fOrigin" placeholder="台北"></div>
+        <button class="swap" id="fSwap" title="互換">⇄</button>
+        <div><label>目的地</label><input id="tDest" placeholder="東京"></div>
+      </div>
+      <div class="chips" id="oChips" style="margin-top:6px"></div>
+      <label>熱門目的地（點一下就選好）</label>
+      <div class="chips" id="rChips"></div>
+      <div class="chips wrapchips" id="dChips"></div>
+      <div class="row">
+        <div><label>出發日</label><input id="tStart" type="date"></div>
+        <div><label>回程日</label><input id="tEnd" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label>人數</label><select id="fPax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <div><label>行程類型</label><select id="fType"><option value="round">來回</option><option value="one">單程</option></select></div>
+      </div>
+      <div class="note" id="tripSum" style="margin-top:8px"></div>
+    </div>
+
     <div class="card postcard">
       <div style="display:flex;justify-content:space-between;align-items:center"><b>🌤 本日天氣</b><button class="ghost" id="wxRefresh" style="padding:5px 12px">重新整理</button></div>
       <div id="wxBody" style="margin-top:8px"><div class="note">設定目的地後，這裡會顯示當地天氣。</div></div>
     </div>
 
-    <details class="card" id="tripBox" open>
-      <summary><b>旅程設定</b></summary>
-      <label>旅程名稱</label><input id="tName" placeholder="例如：東京五日遊">
-      <div class="row">
-        <div><label>目的地</label><input id="tDest" placeholder="東京"></div>
-        <div><label>總預算</label><input id="tBudget" type="number" inputmode="decimal" placeholder="50000"></div>
-      </div>
-      <div class="row">
-        <div><label>出發日</label><input id="tStart" type="date"></div>
-        <div><label>回程日</label><input id="tEnd" type="date"></div>
-      </div>
-    </details>
+    <div class="card" id="flCard">
+      <b><span class="step">2</span>機票</b>
+      <div class="seg" id="flSeg"><button class="on" data-p="search">① 查價</button><button data-p="cmp">② 比價</button><button data-p="air">③ 航空公司</button></div>
 
-    <details class="card" id="flCard">
-      <summary><b>✈️ 機票查詢與航空公司</b></summary>
-      <div class="note" style="margin-top:6px">出國時使用：依目的地與日期，帶你到比價網站查班機與價格，並依預算等級列出常見航空公司。</div>
-      <div class="row"><div><label>出發地</label><input id="fOrigin" placeholder="台北"></div><div style="flex:.5"><label>人數</label><select id="fPax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div></div>
-      <label>預算等級</label>
-      <select id="lvF"><option value="low">省錢（廉航、小吃優先）</option><option value="mid">一般</option><option value="high">寬鬆（品質優先）</option></select>
-      <div id="flInfo" class="note" style="margin:8px 0"></div>
-      <div class="row"><a id="flG" class="btn" target="_blank" rel="noopener" href="#">Google 航班</a><a id="flK" class="btn hidden" target="_blank" rel="noopener" href="#">KAYAK 比價</a></div>
-      <div id="flAir" style="margin-top:12px"></div>
-    </details>
+      <div data-g="flSeg" data-p="search">
+        <div id="flInfo" class="note" style="margin-bottom:8px"></div>
+        <div class="row"><a id="flG" class="btn" target="_blank" rel="noopener" href="#">Google 航班</a><a id="flK" class="btn hidden" target="_blank" rel="noopener" href="#">KAYAK</a></div>
+        <div class="note" style="margin-top:8px">其他常用比價網站（請輸入相同的日期與人數）：<a class="lnk" target="_blank" rel="noopener" href="https://www.skyscanner.com.tw/">Skyscanner</a><a class="lnk" target="_blank" rel="noopener" href="https://tw.trip.com/flights/">Trip.com</a></div>
+        <div id="flRef" style="margin-top:12px"></div>
+        <div class="note" style="margin-top:8px">查到價格後，到「② 比價」把報價填進來，這裡幫你算總價、排名，並帶進預算。</div>
+      </div>
 
+      <div data-g="flSeg" data-p="cmp" class="hidden">
+        <div class="note">把你在各網站看到的報價填進來，自動算含行李總價並排名，選一個帶進預算。</div>
+        <div class="row"><div><label>航空公司</label><input id="qAl" list="alList" placeholder="例如：長榮"><datalist id="alList"></datalist></div>
+          <div><label>報價來源</label><select id="qSrc"><option>Google 航班</option><option>KAYAK</option><option>Skyscanner</option><option>Trip.com</option><option>航空官網</option><option>旅行社</option><option>其他</option></select></div></div>
+        <div class="row"><div><label>每人價格</label><input id="qPrice" type="number" inputmode="decimal" placeholder="0"></div>
+          <div><label>託運行李</label><select id="qBag"><option value="in">已含</option><option value="out">不含</option></select></div>
+          <div id="qFeeWrap" class="hidden"><label>行李加價/人</label><input id="qFee" type="number" inputmode="decimal" placeholder="0"></div></div>
+        <div class="row"><div><label>轉機</label><select id="qStop"><option value="0">直飛</option><option value="1">轉 1 次</option><option value="2">轉 2 次以上</option></select></div>
+          <div><label>備註</label><input id="qNote" placeholder="時間、航廈…"></div></div>
+        <button id="qAdd" style="margin-top:10px;width:100%">加入比價表</button>
+        <div id="qList"></div>
+      </div>
+
+      <div data-g="flSeg" data-p="air" class="hidden">
+        <label>預算等級</label>
+        <select id="lvF"><option value="low">省錢（廉航、小吃優先）</option><option value="mid">一般</option><option value="high">寬鬆（品質優先）</option></select>
+        <div id="flAir" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div class="card" id="lgCard">
+      <b><span class="step">3</span>住宿</b>
+      <div class="row"><div><label>晚數（留空＝依日期自動算）</label><input id="lgNights" type="number" min="0" inputmode="numeric" placeholder="自動"></div>
+        <div><label>每晚價格</label><input id="lgPrice" type="number" inputmode="decimal" placeholder="0"></div></div>
+      <div class="note" id="lgSum" style="margin:8px 0"></div>
+      <div class="row"><a id="lgG" class="btn" target="_blank" rel="noopener" href="#">Google 住宿</a><a id="lgB" class="btn" target="_blank" rel="noopener" href="#">Booking.com</a></div>
+    </div>
+  </section>
+
+  <section id="tab-plan" class="hidden">
     <div class="chips" id="dayChips"></div>
+
 
     <div class="card">
       <b id="dayTitle"></b>
@@ -211,6 +269,8 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 
   <!-- 探索 -->
   <section id="tab-explore" class="hidden">
+    <div class="seg" id="exSeg"><button class="on" data-p="find">🧭 找推薦</button><button data-p="auto">🪄 自動排程</button></div>
+    <div id="sub-find" data-g="exSeg" data-p="find">
     <div class="card">
       <b>🧭 探索目的地</b>
       <div class="note">輸入想去的城市，看看當地的美食、景點和人文特色。</div>
@@ -246,10 +306,8 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
       <div id="eList"></div>
       <div class="note" style="margin:8px 4px">資料來源：OpenStreetMap 貢獻者與維基百科、維基共享資源（社群維護，沒有評分與即時營業資訊，出發前請再確認）。景點照片若來自座標附近的維基共享資源，僅供參考。</div>
     </div>
-  </section>
-
-  <!-- 排程 -->
-  <section id="tab-auto" class="hidden">
+  </div>
+  <div id="sub-auto" class="hidden" data-g="exSeg" data-p="auto">
     <div class="card">
       <b>🪄 行程推薦</b>
       <div class="note">依「天數、每天的時間段、預算等級、步調」，從目的地附近的景點與餐廳排出一份草案（資料來自 OpenStreetMap 與維基百科，沒有評分；景點依地點遠近排在同一天）。天數與日期在「行程」頁設定。</div>
@@ -267,24 +325,38 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
       <div class="row" style="margin-top:12px"><button id="auAdd">加到現有行程</button><button class="ghost" id="auReplace">取代現有行程</button></div>
       <div class="note" style="margin-top:6px">套用後可到「行程」頁拖曳調整、補花費與備註。草案只是起點，營業時間與是否值得去請自行確認。</div>
     </div>
+  </div>
   </section>
+
+  
 
   <!-- 預算 -->
   <section id="tab-budget" class="hidden">
     <div class="card">
-      <div class="grid3">
-        <div><small>預算</small><b id="bTotal">0</b></div>
-        <div><small>已規劃</small><b id="bSpent">0</b></div>
-        <div><small>剩餘</small><b id="bLeft">0</b></div>
-      </div>
+      <b>💰 總預算</b>
+      <div class="row"><div style="flex:.45"><label>幣別符號</label><input id="bCur" placeholder="NT$"></div><div><label>總預算（金額）</label><input id="tBudget" type="number" inputmode="decimal" placeholder="50000"></div></div>
+      <div class="grid3" style="margin-top:14px"><div><small>已規劃</small><b id="bSpent">0</b></div><div><small>剩餘</small><b id="bLeft">0</b></div><div><small>每日平均</small><b id="bDaily">0</b></div></div>
       <div class="bar" id="bBar" style="margin-top:12px"><i style="width:0"></i></div>
       <div class="note" id="bHint"></div>
     </div>
-    <div class="card"><b>各類別</b><div id="byCat" style="margin-top:8px"></div></div>
-    <div class="card"><b>每日花費</b><div id="byDay" style="margin-top:8px"></div></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center"><b>📂 分類預算</b><button class="ghost" id="bAuto" style="padding:5px 12px">依建議比例分配</button></div>
+      <div class="note" id="bAllocNote" style="margin-top:4px"></div>
+      <div id="bCats"></div>
+    </div>
+    <div class="card">
+      <b>🧾 記一筆</b>
+      <div class="note">機票、住宿、行程裡的花費會自動計入。其他零星支出（保險、簽證、伴手禮）在這裡記。</div>
+      <div class="row" style="margin-top:6px"><select id="xpCat"></select><input id="xpAmt" type="number" inputmode="decimal" placeholder="金額"></div>
+      <input id="xpNote" placeholder="備註" style="margin-top:6px">
+      <button id="xpAdd" style="margin-top:8px;width:100%">記下來</button>
+      <div id="xpList"></div>
+    </div>
+    <div class="card"><b>📅 每日花費</b><div id="byDay" style="margin-top:8px"></div></div>
   </section>
 
   <!-- 行李 -->
+
   <section id="tab-pack" class="hidden">
     <div class="card">
       <div class="row"><input id="pText" placeholder="新增物品，例如：護照"><button id="pAdd" style="flex:none">加入</button></div>
@@ -339,13 +411,14 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 </main>
 
 <nav>
-  <button data-t="plan" class="on"><b>🗓</b>行程</button>
+  <button data-t="trip" class="on"><b>✈️</b>出發</button>
+  <button data-t="plan"><b>🗓</b>行程</button>
   <button data-t="explore"><b>🧭</b>探索</button>
-  <button data-t="auto"><b>🪄</b>排程</button>
   <button data-t="budget"><b>💰</b>預算</button>
   <button data-t="pack"><b>🧳</b>行李</button>
   <button data-t="data"><b>📦</b>存檔</button>
 </nav>
+
 
 <div id="book" class="hidden">
   <div class="bar2"><button id="bkClose">← 返回</button><button id="bkDl2">下載小書</button></div>
@@ -373,9 +446,9 @@ function ensureMap(id){
 const numIcon=(n,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color}">${n}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
 const EMO={'景點':'🏛','餐飲':'🍜','交通':'🚆','住宿':'🛏','購物':'🛍','其他':'📌'};
 const WD=['日','一','二','三','四','五','六'];
-let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
+let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],fq:[],lodging:{nights:'',price:''},alloc:{},exp:[],cur:'NT$',tripType:'round',origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
 function normalize(o){
-  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
+  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],fq:(o.fq||[]).filter(q=>q&&typeof q==='object').map(q=>({id:q.id||uid(),al:q.al||'',src:q.src||'其他',price:+q.price||0,bag:q.bag==='out'?'out':'in',fee:+q.fee||0,stop:['0','1','2'].includes(String(q.stop))?String(q.stop):'0',note:q.note||'',chosen:!!q.chosen})),lodging:Object.assign({nights:'',price:''},o.lodging||{}),alloc:Object.assign({},o.alloc||{}),exp:(o.exp||[]).filter(x=>x&&x.cat).map(x=>({id:x.id||uid(),cat:x.cat,amount:+x.amount||0,note:x.note||''})),cur:o.cur||'NT$',tripType:o.tripType==='one'?'one':'round',origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
   (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
   (o.pack||[]).forEach(p=>{if(p&&p.text)r.pack.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   return r;
@@ -608,24 +681,6 @@ function renderDays(){
       <div class="acts"><button class="x" data-e="${s.id}">編輯</button><button class="x" data-x="${s.id}">✕</button></div>
     </div>`).join(''):'<div class="empty">這天還沒有行程，從下方新增，或到「探索」找推薦</div>';
 }
-function renderBudget(){
-  const budget=+S.trip.budget||0;
-  const spent=S.stops.reduce((a,s)=>a+(+s.cost||0),0);
-  $('bTotal').textContent=fmt(budget);$('bSpent').textContent=fmt(spent);
-  $('bLeft').textContent=fmt(budget-spent);
-  $('bLeft').style.color=budget&&spent>budget?'var(--warn)':'';
-  const pct=budget?Math.min(100,spent/budget*100):0;
-  $('bBar').className='bar'+(budget&&spent>budget?' over':'');
-  $('bBar').firstElementChild.style.width=pct+'%';
-  $('bHint').textContent=!budget?'到「行程」頁設定總預算，就能看到進度':spent>budget?'已超出預算 '+fmt(spent-budget):'已使用 '+pct.toFixed(0)+'%';
-  const cats={};S.stops.forEach(s=>cats[s.cat]=(cats[s.cat]||0)+(+s.cost||0));
-  const row=(l,v,m)=>`<div style="display:flex;justify-content:space-between"><span>${l}</span><b>${fmt(v)}</b></div><div class="bar"><i style="width:${m?v/m*100:0}%"></i></div>`;
-  const cm=Math.max(0,...Object.values(cats));
-  $('byCat').innerHTML=Object.keys(cats).length?Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v])=>row(k,v,cm)).join(''):'<div class="empty">尚無花費資料</div>';
-  const n=numDays(),ds=Array.from({length:n},(_,i)=>dayStops(i).reduce((a,s)=>a+(+s.cost||0),0));
-  const dm=Math.max(0,...ds);
-  $('byDay').innerHTML=ds.map((v,i)=>row('Day '+(i+1)+' '+dayLabel(i),v,dm)).join('');
-}
 function renderPack(){
   const done=S.pack.filter(p=>p.done).length;
   $('pProg').textContent=S.pack.length?`已備妥 ${done} / ${S.pack.length}`:'';
@@ -639,10 +694,10 @@ function renderAll(){if(typeof updateFlights==='function')updateFlights();render
   $(id).value=S.trip[k]||'';
   $(id).addEventListener('input',()=>{S.trip[k]=$(id).value;save();renderAll();if(k==='dest'||k==='start'||k==='end'){clearTimeout(wxTimer);wxTimer=setTimeout(loadWeather,900)}});
 });
-function syncTripInputs(){[['tName','name'],['tDest','dest'],['tBudget','budget'],['tStart','start'],['tEnd','end']].forEach(([id,k])=>$(id).value=S.trip[k]||'')}
+function syncTripInputs(){if(typeof syncExtra==='function')syncExtra();[['tName','name'],['tDest','dest'],['tBudget','budget'],['tStart','start'],['tEnd','end']].forEach(([id,k])=>$(id).value=S.trip[k]||'')}
 
 /* ---------- 分頁 ---------- */
-const TABS=['plan','explore','auto','budget','pack','data'];
+const TABS=['trip','plan','explore','budget','pack','data'];
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   TABS.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.t));
@@ -964,7 +1019,7 @@ $('cp').onclick=async()=>{
 /* ---------- 旅遊小書 ---------- */
 const BK_CSS=`.bk{max-width:680px;margin:0 auto;background:#f8f2e6;color:#2b2a28;font:15px/1.7 "Noto Sans TC",-apple-system,"PingFang TC",sans-serif}.bk *{box-sizing:border-box}.bk .art{height:250px;position:relative;overflow:hidden;border-radius:0 0 34px 34px}.bk .art svg{position:absolute;inset:0;width:100%;height:100%}.bk .cv{padding:30px 28px 44px;text-align:center}.bk .eb{letter-spacing:.35em;font-size:11px;color:#e2704f;font-weight:700}.bk .cv h1{font:700 34px/1.3 "Noto Serif TC",Georgia,serif;margin:10px 0 8px;color:#0e5f6b}.bk .cv p{margin:4px 0;color:#6b6457}.bk .stamp{display:inline-block;border:2px dashed #e2704f;color:#e2704f;padding:4px 16px;border-radius:8px;transform:rotate(-2deg);font-weight:700;margin-top:14px;letter-spacing:.12em}.bk .pg{padding:30px 24px;page-break-before:always}.bk .dh{display:flex;align-items:baseline;gap:12px;border-bottom:2px dashed #d9ccb0;padding-bottom:10px;margin-bottom:16px}.bk .dn{font:700 46px/1 "Noto Serif TC",Georgia,serif;color:#e2704f}.bk .dd{font-size:13px;letter-spacing:.2em;color:#6b6457;font-weight:700}.bk h2.sec{font:700 20px "Noto Serif TC",Georgia,serif;color:#0e5f6b;margin:0 0 12px}.bk .it{display:flex;gap:14px;padding:14px 0;border-bottom:1px dashed #e0d5bd;break-inside:avoid}.bk .ph{flex:none;width:104px;height:104px;border-radius:14px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:40px;background:#e4efe9;box-shadow:0 2px 8px rgba(0,0,0,.12)}.bk .t{font:700 17px "Noto Serif TC",Georgia,serif;color:#1f4f57}.bk .m{color:#7a7266;font-size:13px}.bk .tg{font-size:11px;border:1.5px dashed #e2704f;color:#e2704f;padding:0 7px;border-radius:6px;margin-right:6px}.bk table{width:100%;border-collapse:collapse}.bk td{padding:7px 0;border-bottom:1px dashed #e0d5bd}.bk td:last-child{text-align:right}.bk a{color:#0e5f6b}.bk .mp{margin:0 0 12px;border-radius:14px;overflow:hidden}@media print{.bk .pg{padding:12px 0}.bk .art{height:200px}}`;
 function bookletParts(){
-  const t=S.trip,n=numDays(),total=S.stops.reduce((a,s)=>a+(+s.cost||0),0);
+  const t=S.trip,n=numDays(),pl=planned(),total=Object.values(pl).reduce((a,b)=>a+b,0);
   let b=`<div class="bk"><section><div class="art">${SCENE}</div><div class="cv"><div class="eb">TRAVEL JOURNAL</div><h1>${esc(t.name||'我的旅程')}</h1>${t.dest?`<p>📍 ${esc(t.dest)}</p>`:''}${t.start&&t.end?`<p>${esc(t.start)} – ${esc(t.end)}</p>`:''}${t.budget?`<p>預算 ${fmt(+t.budget)}　已規劃 ${fmt(total)}</p>`:''}<div class="stamp">${n} DAYS</div>${S.intro&&S.intro.text?`<p style="margin-top:20px;font-size:14px">${esc(S.intro.text)}</p>`:''}</div></section>`;
   for(let i=0;i<n;i++){
     const l=dayStops(i),svg=buildMap(groupsFor(i));
@@ -972,8 +1027,8 @@ function bookletParts(){
     b+=l.length?l.map((s,j)=>`<div class="it">${s.photo?`<img class="ph" src="${s.photo}" alt="">`:`<div class="ph">${EMO[s.cat]}</div>`}<div><div class="t">${j+1}. ${esc(s.name)}</div><div class="m"><span class="tg">${esc(s.cat)}</span>${s.time?esc(s.time)+' ':''}${s.cost?'· 約 '+fmt(s.cost):''}</div>${s.desc?`<div>${esc(s.desc)}</div>`:''}${s.note?`<div class="m">📝 ${esc(s.note)}</div>`:''}<div class="m"><a href="https://www.google.com/maps/search/?api=1&amp;query=${mapQ(s)}" target="_blank">📍 在地圖開啟</a></div></div></div>`).join(''):'<p class="m">這天尚未安排行程。</p>';
     b+='</section>';
   }
-  const cats={};S.stops.forEach(s=>cats[s.cat]=(cats[s.cat]||0)+(+s.cost||0));
-  b+=`<section class="pg"><h2 class="sec">預算總覽</h2><table>${Object.entries(cats).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v)}</td></tr>`).join('')}<tr><td><b>合計</b></td><td><b>${fmt(total)}</b></td></tr></table>`;
+  const ch=S.fq.find(q=>q.chosen);
+  b+=`<section class="pg"><h2 class="sec">預算總覽</h2><table>${CATS.filter(([k])=>pl[k]||S.alloc[k]).map(([k,l,em])=>`<tr><td>${em} ${l}</td><td>${money(pl[k])}${S.alloc[k]?' ／ '+money(+S.alloc[k]):''}</td></tr>`).join('')}<tr><td><b>合計</b></td><td><b>${money(total)}</b></td></tr></table>${ch?`<p class="m">已選機票：${esc(ch.al||'')}｜${stopLabel(ch.stop)}｜${S.pax} 人合計 ${money(qTotal(ch))}</p>`:''}`;
   if(S.pack.length)b+=`<h2 class="sec" style="margin-top:28px">行李清單</h2>${S.pack.map(p=>`<div>${p.done?'☑':'☐'} ${esc(p.text)}</div>`).join('')}`;
   b+='</section></div>';
   return b;
@@ -1033,31 +1088,150 @@ const AIR={
 };
 const LV_TIP={low:'省錢：先比較「含行李、餐點、選位」後的總價，廉航常另外收費；也留意是否使用不同航廈或機場。',mid:'一般：兼顧價格與便利，建議比較含 20kg 託運行李的總價，並避開太早或太晚、轉機等待過長的班次。',high:'寬鬆：優先直飛與全服務航空，可比較商務艙／豪華經濟艙價差，也可選擇好時段的班次。'};
 const ymd=t=>t?t.replace(/-/g,'').slice(2):'';
+const CATS=[['flight','機票','✈️'],['lodging','住宿','🛏'],['food','餐飲','🍜'],['transport','交通','🚆'],['sight','景點門票','🎟'],['shop','購物','🛍'],['other','其他','📌']];
+const CAT_OF={'景點':'sight','餐飲':'food','交通':'transport','住宿':'lodging','購物':'shop','其他':'other'};
+const SUG={flight:.30,lodging:.25,food:.20,transport:.08,sight:.07,shop:.07,other:.03};
+const money=n=>(S.cur||'NT$')+' '+fmt(n);
+const PRICE_REF={jp:{lcc:[6000,12000],full:[12000,25000]},kr:{lcc:[5000,10000],full:[9000,18000]},sea:{lcc:[5000,12000],full:[10000,22000]},hkmo:{lcc:[4000,9000],full:[6000,14000]},cn:{full:[6000,15000]},eu:{full:[28000,50000]},am:{full:[30000,55000]},oc:{full:[25000,45000]}};
+const DEST=[['東京','jp'],['大阪','jp'],['京都','jp'],['名古屋','jp'],['福岡','jp'],['札幌','jp'],['沖繩','jp'],['首爾','kr'],['釜山','kr'],['濟州','kr'],['曼谷','sea'],['清邁','sea'],['普吉','sea'],['新加坡','sea'],['吉隆坡','sea'],['胡志明','sea'],['河內','sea'],['峴港','sea'],['馬尼拉','sea'],['宿霧','sea'],['峇里島','sea'],['香港','hkmo'],['澳門','hkmo'],['上海','cn'],['北京','cn'],['成都','cn'],['巴黎','eu'],['倫敦','eu'],['羅馬','eu'],['巴塞隆納','eu'],['阿姆斯特丹','eu'],['布拉格','eu'],['維也納','eu'],['蘇黎世','eu'],['紐約','am'],['洛杉磯','am'],['舊金山','am'],['西雅圖','am'],['溫哥華','am'],['雪梨','oc'],['墨爾本','oc'],['奧克蘭','oc']];
+const RG=[['jp','🇯🇵 日本'],['kr','🇰🇷 韓國'],['sea','🌴 東南亞'],['hkmo','🇭🇰 港澳'],['cn','🇨🇳 中國'],['eu','🇪🇺 歐洲'],['am','🗽 美加'],['oc','🦘 澳紐']];
+let dReg='jp';
+const stopLabel=s=>s==='0'?'直飛':s==='1'?'轉 1 次':'轉 2 次以上';
+const qTotal=q=>((+q.price||0)+(q.bag==='out'?(+q.fee||0):0))*(S.pax||1);
+const nightsOf=()=>{const n=S.lodging.nights;return n!==''&&n!=null&&!isNaN(+n)?+n:Math.max(numDays()-1,0)};
+function planned(){
+  const t={};CATS.forEach(([k])=>t[k]=0);
+  S.stops.forEach(s=>{t[CAT_OF[s.cat]||'other']+=+s.cost||0});
+  S.exp.forEach(x=>{if(t[x.cat]!=null)t[x.cat]+=+x.amount||0});
+  const ch=S.fq.find(q=>q.chosen);if(ch)t.flight+=qTotal(ch);
+  t.lodging+=nightsOf()*(+S.lodging.price||0);
+  return t;
+}
+function renderDest(){
+  const r=REGION.find(([,re])=>re.test(S.trip.dest||''));
+  $('rChips').innerHTML=RG.map(([k,l])=>`<button class="chip ${dReg===k?'on':''}" data-rg="${k}">${l}</button>`).join('');
+  $('dChips').innerHTML=DEST.filter(d=>d[1]===dReg).map(d=>`<button class="chip ${S.trip.dest===d[0]?'on':''}" data-dn="${d[0]}">${d[0]}</button>`).join('');
+  $('oChips').innerHTML=['台北','高雄','台中','台南'].map(n=>`<button class="chip ${S.origin===n?'on':''}" data-on="${n}">出發：${n}</button>`).join('');
+}
+$('rChips').onclick=e=>{const b=e.target.closest('[data-rg]');if(b){dReg=b.dataset.rg;renderDest()}};
+$('dChips').onclick=e=>{const b=e.target.closest('[data-dn]');if(!b)return;S.trip.dest=b.dataset.dn;$('tDest').value=S.trip.dest;save();renderAll();loadWeather()};
+$('oChips').onclick=e=>{const b=e.target.closest('[data-on]');if(!b)return;S.origin=b.dataset.on;$('fOrigin').value=S.origin;save();renderAll()};
+$('fSwap').onclick=()=>{const a=S.origin,b=S.trip.dest;S.origin=b;S.trip.dest=a;$('fOrigin').value=S.origin;$('tDest').value=S.trip.dest;save();renderAll();loadWeather()};
+
 function updateFlights(){
-  const dest=(S.trip.dest||'').trim(),o=(S.origin||'').trim(),{start,end}=S.trip,pax=S.pax||1;
-  const oc=findCode(o),dc=findCode(dest),ok=!!(dest&&o);
-  $('flInfo').textContent=`${o||'（出發地）'} → ${dest||'（請先在旅程設定填目的地）'}｜${start?start+(end?' ～ '+end:'（單程）'):'尚未設定日期'}｜${pax} 人`;
-  const q=`Flights from ${oc||o} to ${dc||dest}`+(start?` on ${start}`:'')+(start&&end?` through ${end}`:'');
-  $('flG').href=ok?`https://www.google.com/travel/flights?hl=zh-TW&curr=TWD&q=${encodeURIComponent(q)}`:'#';
+  const dest=(S.trip.dest||'').trim(),o=(S.origin||'').trim(),{start,end}=S.trip,pax=S.pax||1,one=S.tripType==='one';
+  const oc=findCode(o),dc=findCode(dest),ok=!!(dest&&o),nd=numDays(),e=encodeURIComponent;
+  const hasDates=!!(start&&end);
+  $('tripSum').textContent=`${o||'出發地'} ${one?'→':'⇄'} ${dest||'目的地'}｜${hasDates?nd+' 天 '+Math.max(nd-1,0)+' 夜':'尚未設定日期'}｜${pax} 人`;
+  $('flInfo').textContent=`${o||'（出發地）'} ${one?'→':'⇄'} ${dest||'（請先選目的地）'}｜${start?start+(!one&&end?' ～ '+end:''):'尚未設定日期'}｜${pax} 人`;
+  const q=`Flights from ${oc||o} to ${dc||dest}`+(start?` on ${start}`:'')+(start&&end&&!one?` through ${end}`:'');
+  $('flG').href=ok?`https://www.google.com/travel/flights?hl=zh-TW&curr=TWD&q=${e(q)}`:'#';
   const kOk=ok&&oc&&dc&&start;
   $('flK').classList.toggle('hidden',!kOk);
-  if(kOk)$('flK').href=`https://www.kayak.com.tw/flights/${oc}-${dc}/${start}${end?'/'+end:''}/${pax}adults`;
-  const rk=(REGION.find(([,re])=>re.test(dest))||['other'])[0],A=AIR[rk],lv=S.level||'mid';
+  if(kOk)$('flK').href=`https://www.kayak.com.tw/flights/${oc}-${dc}/${start}${!one&&end?'/'+end:''}/${pax}adults`;
+  const rk=(REGION.find(([,re])=>re.test(dest))||['other'])[0],A=AIR[rk],lv=S.level||'mid',tw=/台北|桃園|高雄|台中|台南|花蓮|TPE|KHH|RMQ|TNN/i.test(o);
+  // 價格粗估
+  const ref=PRICE_REF[rk];
+  if(ref&&tw){
+    const mid=r=>r?(r[0]+r[1])/2:null,L=mid(ref.lcc),F=mid(ref.full);
+    const pick=lv==='low'?(L||F):lv==='high'?(F||L):(L&&F?(L+F)/2:(L||F));
+    const per=one?pick*.55:pick,tot=Math.round(per*pax/100)*100;
+    $('flRef').innerHTML=`<div class="refbox"><b>💡 價格粗估（台灣出發${one?'單程':'來回'}經濟艙，每人）</b><div class="note" style="margin-top:4px">${ref.lcc?`廉航約 ${money(ref.lcc[0]*(one?.55:1))}～${money(ref.lcc[1]*(one?.55:1))}<br>`:''}全服務約 ${money(ref.full[0]*(one?.55:1))}～${money(ref.full[1]*(one?.55:1))}</div><div class="note">依淡旺季、訂位時間差很多，只是用來抓預算，實際請以查詢結果為準。</div><button class="ghost" id="refSet" style="margin-top:8px;width:100%">用「${lv==='low'?'省錢':lv==='high'?'寬鬆':'一般'}」估算，把機票預算設為 ${money(tot)}（${pax} 人）</button></div>`;
+    $('refSet').onclick=()=>{S.alloc.flight=tot;save();renderBudget();renderQuotes();toast('已把機票預算設為 '+money(tot))};
+  }else $('flRef').innerHTML=tw?'':'<div class="note">⚠️ 價格粗估與航空公司清單以台灣出發為主，其他出發地請以查詢結果為準。</div>';
+  // 航空公司
   const order=lv==='low'?[['廉航',A.lcc],['全服務',A.full]]:[['全服務',A.full],['廉航',A.lcc]];
-  const budget=+S.trip.budget||0;
   let h=`<b>常見航空公司（${esc(A.n)}）</b>`+order.filter(([,l])=>l.length).map(([t,l])=>`<div style="margin:8px 0 2px" class="note">${t}</div><div>${l.map(x=>`<span class="tag" style="margin-bottom:4px">${esc(x)}</span>`).join('')}</div>`).join('');
   h+=`<div class="note" style="margin-top:8px">💡 ${LV_TIP[lv]}</div>`;
-  if(budget)h+=`<div class="note">💰 機票通常占旅費約三到四成，以你的預算約 ${fmt(budget*.3)}～${fmt(budget*.4)}（經驗法則，僅供參考）。</div>`;
-  const nd=numDays();if(start&&end&&nd<=3)h+=`<div class="note">🕒 只有 ${nd} 天，建議選早去晚回的班次，才不浪費行程。</div>`;
-  if(!/台北|桃園|高雄|台中|台南|花蓮|TPE|KHH|RMQ|TNN/i.test(o))h+=`<div class="note">⚠️ 這份清單以台灣出發為主，其他出發地請以查詢結果為準。</div>`;
-  h+=`<div class="note" style="margin-top:6px">航空公司清單是依一般情況整理的靜態資料，航線與班次會變動，不保證目前一定有直飛。實際班次、時間與價格請以上方查詢結果為準；本頁無法即時顯示班機。</div>`;
+  if(start&&end&&nd<=3)h+=`<div class="note">🕒 只有 ${nd} 天，建議選早去晚回的班次，才不浪費行程。</div>`;
+  h+=`<div class="note" style="margin-top:6px">航空公司清單是依一般情況整理的靜態資料，航線與班次會變動，不保證目前一定有直飛。實際班次與價格請以查詢結果為準；本頁無法即時顯示班機。</div>`;
   $('flAir').innerHTML=h;
+  $('alList').innerHTML=[...A.full,...A.lcc].map(x=>`<option value="${esc(x.replace(/\s+[A-Z0-9／]{2,}.*$/,'').replace(/（.*）/,''))}">`).join('');
+  // 住宿
+  const nights=nightsOf(),price=+S.lodging.price||0;
+  $('lgSum').textContent=`${nights} 晚 × ${money(price)} = ${money(nights*price)}`+(S.pax>1?'（每間房價格；人數多可分房自行加總）':'');
+  $('lgG').href=dest?`https://www.google.com/travel/search?q=${e('hotels in '+dest)}&hl=zh-TW`:'#';
+  $('lgB').href=dest?`https://www.booking.com/searchresults.zh-tw.html?ss=${e(dest)}${hasDates?`&checkin=${start}&checkout=${end}`:''}&group_adults=${pax}&no_rooms=1`:'#';
+  renderDest();renderQuotes();
 }
-$('fOrigin').value=S.origin;$('fPax').value=String(S.pax);
+function renderQuotes(){
+  const pax=S.pax||1,L=S.fq.slice().sort((a,b)=>qTotal(a)-qTotal(b));
+  if(!L.length){$('qList').innerHTML='<div class="empty">還沒有報價。先到「① 查價」開網站查，再把看到的價格填進來比較。</div>';return}
+  const min=qTotal(L[0]),max=qTotal(L[L.length-1]),dMin=L.find(q=>q.stop==='0'),lim=+S.alloc.flight||0;
+  $('qList').innerHTML=`<div class="note" style="margin-top:10px">${L.length} 筆報價｜最低 ${money(min)}${L.length>1?`｜最高 ${money(max)}｜相差 ${money(max-min)}`:''}</div>`+L.map((q,i)=>{
+    const t=qTotal(q);
+    return `<div class="qc ${q.chosen?'sel':''}"><div><b>${esc(q.al||'（未填航空公司）')}</b> <span class="tag">${esc(q.src)}</span>${i===0?'<span class="tag" style="border-color:var(--acc);color:var(--acc)">🏆 最低總價</span>':''}${dMin&&dMin.id===q.id&&i!==0?'<span class="tag">直飛最低</span>':''}</div>
+    <div class="note">每人 ${money(+q.price||0)}${q.bag==='out'?` ＋ 行李 ${money(+q.fee||0)}`:'（含託運行李）'}｜${stopLabel(q.stop)}${q.note?'｜'+esc(q.note):''}</div>
+    <div class="qt">${pax} 人合計 <b>${money(t)}</b>${i>0?` <span class="note">比最低貴 ${money(t-min)}</span>`:''}</div>
+    ${lim?`<div class="note" style="color:${t>lim?'var(--warn)':'var(--acc)'}">${t>lim?'超出機票預算 '+money(t-lim):'在機票預算內，剩 '+money(lim-t)}</div>`:''}
+    <div class="row" style="margin-top:8px"><button data-qs="${q.id}" class="${q.chosen?'':'ghost'}">${q.chosen?'已選這個 ✓（已計入預算）':'選這個'}</button><button class="ghost" data-qd="${q.id}" style="flex:none">刪除</button></div></div>`;
+  }).join('');
+}
+$('qBag').onchange=()=>$('qFeeWrap').classList.toggle('hidden',$('qBag').value!=='out');
+$('qAdd').onclick=()=>{
+  const price=+$('qPrice').value;
+  if(!(price>0)){toast('請填每人價格');$('qPrice').focus();return}
+  S.fq.push({id:uid(),al:$('qAl').value.trim(),src:$('qSrc').value,price,bag:$('qBag').value,fee:+$('qFee').value||0,stop:$('qStop').value,note:$('qNote').value.trim(),chosen:false});
+  ['qAl','qPrice','qFee','qNote'].forEach(i=>$(i).value='');
+  save();renderQuotes();toast('已加入比價表');
+};
+$('qList').onclick=e=>{
+  const s=e.target.dataset.qs,d=e.target.dataset.qd;
+  if(s){S.fq.forEach(q=>q.chosen=q.id===s&&!q.chosen);save();renderQuotes();renderBudget()}
+  if(d){S.fq=S.fq.filter(q=>q.id!==d);save();renderQuotes();renderBudget()}
+};
+$('fType').onchange=()=>{S.tripType=$('fType').value;save();renderAll()};
+$('lgNights').addEventListener('input',()=>{S.lodging.nights=$('lgNights').value;save();updateFlights();renderBudget()});
+$('lgPrice').addEventListener('input',()=>{S.lodging.price=$('lgPrice').value;save();updateFlights();renderBudget()});
+$('bCur').addEventListener('input',()=>{S.cur=$('bCur').value||'NT$';save();renderAll()});
+function syncExtra(){
+  $('fOrigin').value=S.origin;$('fPax').value=String(S.pax);$('fType').value=S.tripType;
+  $('lgNights').value=S.lodging.nights;$('lgPrice').value=S.lodging.price;$('bCur').value=S.cur;
+  ['lvA','lvF'].forEach(x=>$(x).value=S.level);
+  $('auS').value=S.auto.start;$('auE').value=S.auto.end;$('auPace').value=String(S.auto.pace);
+}
 $('fOrigin').addEventListener('input',()=>{S.origin=$('fOrigin').value;save();updateFlights()});
-$('fPax').onchange=()=>{S.pax=+$('fPax').value;save();updateFlights()};
+$('fPax').onchange=()=>{S.pax=+$('fPax').value;save();renderAll()};
 function bindLevel(id){$(id).value=S.level;$(id).onchange=()=>{S.level=$(id).value;['lvA','lvF'].forEach(x=>$(x).value=S.level);save();updateFlights()}}
 bindLevel('lvA');bindLevel('lvF');
+document.querySelectorAll('.seg').forEach(seg=>seg.addEventListener('click',ev=>{
+  const b=ev.target.closest('button[data-p]');if(!b)return;
+  seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll(`[data-g="${seg.id}"]`).forEach(p=>p.classList.toggle('hidden',p.dataset.p!==b.dataset.p));
+}));
+function renderBudget(){
+  const budget=+S.trip.budget||0,pl=planned(),spent=Object.values(pl).reduce((a,b)=>a+b,0),n=numDays();
+  $('bSpent').textContent=money(spent);
+  $('bLeft').textContent=money(budget-spent);$('bLeft').style.color=budget&&spent>budget?'var(--warn)':'';
+  $('bDaily').textContent=money(budget/n);
+  const pct=budget?Math.min(100,spent/budget*100):0;
+  $('bBar').className='bar'+(budget&&spent>budget?' over':'');$('bBar').firstElementChild.style.width=pct+'%';
+  $('bHint').textContent=!budget?'先在上面填總預算（金額），就能看到進度':spent>budget?'已超出預算 '+money(spent-budget):'已使用 '+pct.toFixed(0)+'%，剩 '+money(budget-spent);
+  const sumAl=CATS.reduce((a,[k])=>a+(+S.alloc[k]||0),0);
+  $('bAllocNote').innerHTML=!budget?'設定總預算後，可按「依建議比例分配」，再依需要微調每個分類的上限。':`已分配 ${money(sumAl)} ／ 總預算 ${money(budget)}，${sumAl>budget?`<span style="color:var(--warn)">超出 ${money(sumAl-budget)}</span>`:`未分配 ${money(budget-sumAl)}`}`;
+  $('bCats').innerHTML=CATS.map(([k,l,em])=>{
+    const p=pl[k]||0,al=+S.alloc[k]||0,over=al&&p>al,w=al?Math.min(100,p/al*100):(p?100:0);
+    return `<div class="bc"><div class="bch"><span>${em} <b>${l}</b></span><span><b>${money(p)}</b></span></div><div class="bar ${over?'over':''}" style="margin:6px 0 4px"><i style="width:${w}%"></i></div><div class="bcf"><span class="note">上限</span><input type="number" inputmode="decimal" data-al="${k}" value="${al||''}" placeholder="0"><span class="note" style="${over?'color:var(--warn)':''}">${al?(over?'超出 '+money(p-al):'剩 '+money(al-p)):'未設定上限'}</span></div></div>`;
+  }).join('');
+  const ds=Array.from({length:n},(_,i)=>dayStops(i).reduce((a,s)=>a+(+s.cost||0),0)),dm=Math.max(0,...ds);
+  const row=(l,v,m)=>`<div style="display:flex;justify-content:space-between"><span>${l}</span><b>${money(v)}</b></div><div class="bar"><i style="width:${m?v/m*100:0}%"></i></div>`;
+  $('byDay').innerHTML=(ds.some(v=>v)?'':'<div class="note" style="margin-bottom:6px">行程裡填了花費，這裡就會顯示每天的小計。</div>')+ds.map((v,i)=>row('Day '+(i+1)+' '+dayLabel(i),v,dm)).join('');
+  $('xpList').innerHTML=S.exp.length?S.exp.map(x=>{const c=CATS.find(c=>c[0]===x.cat);return `<div class="pk"><span>${c?c[2]:'📌'}</span><span class="grow">${esc(x.note||(c?c[1]:''))} <span class="note">${c?c[1]:''}</span></span><b>${money(x.amount)}</b><button class="x" data-xd="${x.id}">✕</button></div>`}).join(''):'';
+}
+$('bCats').onchange=e=>{const k=e.target.dataset.al;if(!k)return;S.alloc[k]=+e.target.value||0;save();renderBudget();renderQuotes()};
+$('bAuto').onclick=()=>{
+  const b=+S.trip.budget||0;if(!b){toast('請先填總預算');$('tBudget').focus();return}
+  let used=0;CATS.forEach(([k],i)=>{const v=i===CATS.length-1?b-used:Math.round(b*SUG[k]/100)*100;S.alloc[k]=Math.max(v,0);used+=S.alloc[k]});
+  save();renderBudget();renderQuotes();toast('已依建議比例分配（機票 30%、住宿 25%、餐飲 20%…），可再微調');
+};
+$('xpCat').innerHTML=CATS.map(([k,l,em])=>`<option value="${k}">${em} ${l}</option>`).join('');
+$('xpAdd').onclick=()=>{
+  const amount=+$('xpAmt').value;if(!(amount>0)){toast('請填金額');$('xpAmt').focus();return}
+  S.exp.push({id:uid(),cat:$('xpCat').value,amount,note:$('xpNote').value.trim()});
+  $('xpAmt').value='';$('xpNote').value='';save();renderBudget();toast('已記下');
+};
+$('xpList').onclick=e=>{const d=e.target.dataset.xd;if(d){S.exp=S.exp.filter(x=>x.id!==d);save();renderBudget()}};
+
 
 /* ---------- 行程推薦（依天數、時間段、預算等級自動排程） ---------- */
 async function fetchOsmSights(c){
@@ -1182,9 +1356,11 @@ $('gKeyClear').onclick=()=>{try{localStorage.removeItem('trip-gkey')}catch(e){}$
 renderRevChips();
 
 $('heroArt').innerHTML=SCENE;
+syncExtra();
 resetForm();
 renderAll();
 loadWeather();
+document.querySelector('nav button[data-t="'+(S.trip.dest?'plan':'trip')+'"]').click();
 </script>
 </body>
 </html>
