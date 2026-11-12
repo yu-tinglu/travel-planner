@@ -303,6 +303,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
       </div>
       <label>名稱</label>
       <div class="row"><input id="sName" placeholder="淺草寺、地址或店名"><button class="ghost" id="psGo" style="flex:none">🔍 找地點</button></div>
+      <div class="note" id="gHint" style="margin-top:4px"></div>
       <div class="ps" id="psRes"></div>
       <div class="row">
         <div><label>日期</label><select id="sDay"></select></div>
@@ -498,11 +499,12 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
     </div>
     <div class="card">
       <b>⭐ Google 評分與評論（選填）</b>
-      <div class="note">貼上你自己的 Google Maps 金鑰，探索結果就能直接顯示 Google 星等與評論。金鑰只存在這支手機的瀏覽器，不會被匯出或上傳。沒有金鑰也能用，評論會用連結帶你到各平台看。</div>
+      <div class="note">貼上你自己的 Google Maps 金鑰後，找地點、探索景點與餐廳（含 Google 星等、照片）、點到點交通時間都會改用 Google 地圖資料，位置會準很多。金鑰只存在這支手機的瀏覽器，不會被匯出或上傳。沒有金鑰也能用，但資料來自 OpenStreetMap，可能不夠準。</div>
       <label>API 金鑰</label><input id="gKey" type="password" placeholder="AIza…" autocomplete="off">
       <div class="row" style="margin-top:8px"><button id="gKeySave">儲存</button><button class="ghost" id="gKeyClear">清除</button></div>
+      <button class="ghost" id="gReloc" style="width:100%;margin-top:8px">📍 用 Google 重新定位所有行程</button>
       <details style="margin-top:10px"><summary class="note">怎麼取得金鑰？（需要 Google Cloud 帳單帳戶）</summary>
-        <ol class="note" style="padding-left:18px"><li>到 console.cloud.google.com 建立專案並綁定付款方式。</li><li>在「API 和服務」啟用 Places API (New)。</li><li>建立 API 金鑰；在限制裡選「網站」，填 https://yu-tinglu.github.io/* ，API 限制只選 Places API (New)。</li><li>把金鑰貼回這裡儲存。</li></ol>
+        <ol class="note" style="padding-left:18px"><li>到 console.cloud.google.com 建立專案並綁定付款方式。</li><li>在「API 和服務」啟用 Places API (New) 與 Routes API 兩個服務。</li><li>建立 API 金鑰；在限制裡選「網站」，填 https://yu-tinglu.github.io/* ，API 限制只選 Places API (New)。</li><li>把金鑰貼回這裡儲存。</li></ol>
         <div class="note">Google 對這類查詢依用量計費（有每月免費額度，詳情請看 Google 的價格頁），建議在 Google Cloud 設定預算提醒。</div>
       </details>
     </div>
@@ -705,11 +707,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function jget(url){const r=await fetch(url);if(!r.ok)throw new Error('http '+r.status);return r.json()}
 const cc=()=>S.kind==='tw'?'&countrycodes=tw':'';
 async function geocode(q){
+  if(getKey()){try{const g=await gText(q,null,{n:1});if(g[0])return{lat:g[0].lat,lng:g[0].lng}}catch(e){gErr(e)}}
   const j=await jget('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=zh-TW'+cc()+'&q='+encodeURIComponent(q));
   return j&&j[0]?{lat:+j[0].lat,lng:+j[0].lon}:null;
 }
 /* 以目的地為中心，找出較精確的地點候選 */
 async function geocodeNear(q,c){
+  if(getKey()){try{const g=await gText(q,c,{n:8,radius:30000});const o=g.map(r=>({...r,d:c?distKm(c,r):0})).filter(r=>!c||r.d<150);if(o.length)return o}catch(e){gErr(e)}}
   let url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=1&accept-language=zh-TW'+cc()+'&q='+encodeURIComponent(q);
   if(c)url+=`&viewbox=${c.lng-.6},${c.lat+.6},${c.lng+.6},${c.lat-.6}`;
   const j=await jget(url);
@@ -752,6 +756,7 @@ const cuText=c=>String(c||'').split(';').map(x=>CU[x.trim()]||x.trim()).filter(B
 const okUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
 
 async function fetchFood(c,limit=10){
+  if(getKey()){try{const g=await fetchFoodG(c,limit);if(g.length)return g}catch(e){gErr(e)}}
   const els=await overpass(`[out:json][timeout:25];nwr["amenity"~"^(restaurant|fast_food|cafe|food_court)$"]["name"](around:4000,${c.lat},${c.lng});out center 250;`);
   const seen=new Set();
   return els.map(e=>{
@@ -763,6 +768,7 @@ async function fetchFood(c,limit=10){
   }).filter(x=>x&&!seen.has(x.name)&&seen.add(x.name)).sort((a,b)=>b.score-a.score).slice(0,limit);
 }
 async function fetchSights(c,limit=8){
+  if(getKey()){try{const g=await fetchSightsG(c,limit);if(g.length)return g}catch(e){gErr(e)}}
   const j=await jget(`${WP}&generator=geosearch&ggscoord=${c.lat}|${c.lng}&ggsradius=10000&ggslimit=50&prop=pageimages|extracts|coordinates&colimit=max&pilimit=max${WP_PROPS}`);
   const bad=/車站|學校|大學|中學|國小|國中|高中|分局|派出所|郵局|醫院|行政區|公司/;
   return pagesOf(j).filter(p=>!bad.test(p.title)).map(p=>{
@@ -830,6 +836,7 @@ function renderDays(){
   $('dayTitle').innerHTML=`<span class="dn">${String(day+1).padStart(2,'0')}</span><span class="dd">DAY · ${esc(dayLabel(day))}</span>`;
   const list=dayStops(day);
   if(S.stops.some(x=>!hasXY(x)&&!locTried.has(x.id)))setTimeout(autoLocate,400);
+  if(getKey()&&list.length>1)setTimeout(ensureLegs,500);
   $('routeLink').classList.toggle('hidden',list.length<2);$('chainBox').classList.toggle('hidden',list.length<1);
   if(list.length>=2){
     const mid=list.slice(1,-1).map(mapQ).join('%7C');
@@ -875,6 +882,71 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 
 /* ---------- 行程編輯 ---------- */
 $('mode').onchange=()=>{renderDays();renderMap()};
+/* ---------- Google 地圖資料（有金鑰時優先使用） ---------- */
+const GFIELDS='places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.primaryTypeDisplayName,places.googleMapsUri,places.photos';
+let gErrShown=false;
+function gErr(e){if(gErrShown)return;gErrShown=true;toast(e&&(e.status===400||e.status===403)?'Google 金鑰無法使用（請確認已啟用 Places API (New)、Routes API，且網址限制含 yu-tinglu.github.io），先改用免費資料':'Google 查詢暫時失敗，先改用免費資料')}
+async function gText(q,c,o={}){
+  const key=getKey();if(!key)throw new Error('nokey');
+  const body={textQuery:q,languageCode:'zh-TW',maxResultCount:o.n||10};
+  if(S.kind==='tw')body.regionCode='TW';
+  if(c)body.locationBias={circle:{center:{latitude:c.lat,longitude:c.lng},radius:Math.min(o.radius||20000,50000)}};
+  const r=await fetch('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':GFIELDS},body:JSON.stringify(body)});
+  if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}
+  return ((await r.json()).places||[]).map(p=>({id:p.id,name:(p.displayName&&p.displayName.text)||'',addr:p.formattedAddress||'',lat:p.location?p.location.latitude:null,lng:p.location?p.location.longitude:null,kind:(p.primaryTypeDisplayName&&p.primaryTypeDisplayName.text)||'',rating:p.rating,count:p.userRatingCount||0,uri:p.googleMapsUri||'',photo:p.photos&&p.photos[0]?p.photos[0].name:''})).filter(p=>p.name&&p.lat!=null);
+}
+const gPhoto=n=>n?`https://places.googleapis.com/v1/${n}/media?maxHeightPx=420&maxWidthPx=640&key=${encodeURIComponent(getKey())}`:'';
+const gScore=p=>(p.rating||0)*Math.log10((p.count||0)+10);
+const gDesc=p=>[p.kind,p.rating?'⭐'+p.rating+'（'+fmt(p.count)+' 則 Google 評論）':'',p.addr].filter(Boolean).join('｜');
+async function fetchFoodG(c,limit){
+  const where=ex.place||S.trip.dest||'',qs=limit>20?['美食 餐廳','小吃','咖啡廳','早餐']:['美食 餐廳'];
+  const res=await Promise.all(qs.map(q=>gText(where+' '+q,c,{n:20,radius:8000}).catch(e=>{if(e.status)throw e;return []})));
+  const seen=new Set();
+  return res.flat().filter(p=>!seen.has(p.id)&&seen.add(p.id)&&p.count>=10).sort((a,b)=>gScore(b)-gScore(a)).slice(0,limit)
+    .map(p=>({type:'food',name:p.name,score:gScore(p),amenity:/咖啡|cafe|coffee/i.test(p.kind)?'cafe':'restaurant',desc:gDesc(p),tip:'',cost:0,lat:p.lat,lng:p.lng,url:'',img:gPhoto(p.photo)}));
+}
+async function fetchSightsG(c,limit){
+  const where=ex.place||S.trip.dest||'';
+  const p=await gText(where+' 景點 觀光',c,{n:20,radius:15000});
+  const bad=/車站|學校|大學|醫院|公司|飯店|旅館/;
+  return p.filter(x=>!bad.test(x.name)&&x.count>=20).sort((a,b)=>gScore(b)-gScore(a)).slice(0,limit)
+    .map(x=>({type:'sight',name:x.name,score:gScore(x),desc:gDesc(x),tip:'',cost:0,lat:x.lat,lng:x.lng,img:gPhoto(x.photo),url:''}));
+}
+/* 點到點：Google 路線時間 */
+const legReal={},legTry=new Set();let legBusy=false;
+const legKey=(a,b,m)=>[a.lat,a.lng,b.lat,b.lng,m].join('|');
+async function gRoute(a,b,mode){
+  const key=getKey();if(!key)return null;
+  const body={origin:{location:{latLng:{latitude:a.lat,longitude:a.lng}}},destination:{location:{latLng:{latitude:b.lat,longitude:b.lng}}},travelMode:{transit:'TRANSIT',walking:'WALK',driving:'DRIVE'}[mode],languageCode:'zh-TW',units:'METRIC'};
+  const r=await fetch('https://routes.googleapis.com/directions/v2:computeRoutes',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':'routes.duration,routes.distanceMeters'},body:JSON.stringify(body)});
+  if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}
+  const rt=((await r.json()).routes||[])[0];if(!rt||!rt.duration)return null;
+  return{min:Math.max(1,Math.round(parseInt(rt.duration,10)/60)),km:(rt.distanceMeters||0)/1000};
+}
+async function ensureLegs(){
+  if(!getKey()||legBusy)return;
+  const list=dayStops(day);if(list.length<2)return;
+  legBusy=true;
+  try{for(let i=0;i<list.length-1;i++){
+    const a=list[i],b=list[i+1];if(!hasXY(a)||!hasXY(b))continue;
+    const m=effMode(a),k=legKey(a,b,m);if(k in legReal||legTry.has(k))continue;
+    legTry.add(k);
+    try{const r=await gRoute(a,b,m);if(r){legReal[k]=r;renderDays()}}catch(e){gErr(e)}
+  }}finally{legBusy=false}
+}
+/* 用 Google 重新定位所有行程 */
+async function relocateAll(){
+  if(!getKey()){toast('請先儲存 Google 金鑰');return}
+  const dest=(S.trip.dest||'').trim(),c=dest?await geocodeCached(dest):null;let n=0;
+  for(let i=0;i<S.stops.length;i++){
+    const s=S.stops[i];toast(`Google 定位 ${i+1}/${S.stops.length}…`);
+    try{const r=await gText(s.name+(dest&&!s.name.includes(dest)?' '+dest:''),c,{n:1,radius:30000});
+      if(r[0]&&(!c||distKm(c,r[0])<150)){s.lat=r[0].lat;s.lng=r[0].lng;n++}}catch(e){gErr(e);break}
+  }
+  Object.keys(legReal).forEach(k=>delete legReal[k]);legTry.clear();
+  save();renderAll();toast(`已用 Google 重新定位 ${n} 個行程`);
+}
+
 /* ---------- 停留時間與點到點交通 ---------- */
 const tmin=t=>{const m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null};
 const tfrom=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
@@ -887,6 +959,7 @@ function timeRange(s){
 const durText=m=>m>=60?(m%60?Math.floor(m/60)+' 小時 '+m%60+' 分':m/60+' 小時'):m+' 分';
 function legMin(a,b,mode){
   if(!a||!b||!hasXY(a)||!hasXY(b))return null;
+  const rl=legReal[legKey(a,b,mode)];if(rl)return{min:rl.min,km:rl.km,walk:false,real:true};
   const km=distKm(a,b)*1.3;let m;
   if(mode==='walking')m=km/4.5*60;
   else if(mode==='driving')m=5+km/28*60;
@@ -900,7 +973,7 @@ function legHTML(a,b){
   const url='https://www.google.com/maps/dir/?api=1&origin='+mapQ(a)+'&destination='+mapQ(b)+'&travelmode='+mode;
   const btn=['transit','walking','driving'].map(m=>`<button class="${m===mode?'on':''}" data-lm="${a.id}" data-m="${m}" title="${MODE_NAME[m]}">${MODE_ICON[m]}</button>`).join('');
   let info;
-  if(L){const d=L.km<1?Math.round(L.km*1000)+' m':L.km.toFixed(1)+' km';info=`<b>約 ${L.min} 分</b><span>${L.walk?'步行即可 · ':''}${d}</span>`}
+  if(L){const d=L.km<1?Math.round(L.km*1000)+' m':L.km.toFixed(1)+' km';info=`<b>約 ${L.min} 分</b><span>${L.walk?'步行即可 · ':''}${d} · ${L.real?'Google 路線':'估算'}</span>`}
   else info=`<span>${locTried.has(a.id)&&!hasXY(a)||locTried.has(b.id)&&!hasXY(b)?'找不到位置，編輯時用「🔍 找地點」選':'位置查詢中…'}</span>`;
   let h=`<div class="leg"><div class="lm">${btn}</div><div class="li">${info}</div><a class="lnk" href="${url}" target="_blank" rel="noopener">路線›</a>`;
   const ta=tmin(a.time),tb=tmin(b.time);
@@ -946,7 +1019,7 @@ $('psGo').onclick=async()=>{
   try{
     const dest=(S.trip.dest||'').trim(),c=dest?await geocodeCached(dest):null;
     psList=await geocodeNear(q,c);
-    $('psRes').innerHTML=psList.length?psList.slice(0,6).map((r,i)=>`<div class="pi" data-pi="${i}"><b>${esc(r.name)}</b><span>${esc(r.addr)}${r.d?' · 距目的地中心 '+(r.d<1?Math.round(r.d*1000)+' m':r.d.toFixed(1)+' km'):''}</span></div>`).join('')+'<div class="note">點選正確的那一個，位置就會準確。</div>':'<div class="note">找不到。換個寫法，或加上區名、路名再搜一次。</div>';
+    $('psRes').innerHTML=psList.length?psList.slice(0,6).map((r,i)=>`<div class="pi" data-pi="${i}"><b>${esc(r.name)}</b><span>${r.rating?'⭐'+r.rating+' · ':''}${r.kind&&getKey()?esc(r.kind)+' · ':''}${esc(r.addr)}${r.d?' · 距目的地中心 '+(r.d<1?Math.round(r.d*1000)+' m':r.d.toFixed(1)+' km'):''}</span></div>`).join('')+'<div class="note">點選正確的那一個，位置就會準確。</div>':'<div class="note">找不到。換個寫法，或加上區名、路名再搜一次。</div>';
   }catch(e){$('psRes').innerHTML='<div class="note">'+esc(netMsg(e))+'</div>'}
 };
 $('psRes').onclick=e=>{const d=e.target.closest('[data-pi]');if(!d)return;const r=psList[+d.dataset.pi];if(!r)return;
@@ -1364,6 +1437,7 @@ function renderDest(){
   document.body.classList.toggle('kind-tw',S.kind==='tw');
   document.querySelectorAll('#kSeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===S.kind));
   $('tDest').placeholder=S.kind==='tw'?'台南':'東京';
+  $('gHint').textContent=getKey()?'✓ 使用 Google 地圖資料':'目前用 OpenStreetMap，可能不夠準；到「存檔」填 Google 金鑰後會改用 Google 地圖資料。';
   $('lgStep').textContent=S.kind==='tw'?'2':'3';
   {const cur=$('xpCat').value;$('xpCat').innerHTML=catsK().map(([k,l,em])=>`<option value="${k}">${em} ${l}</option>`).join('');if(catsK().some(c=>c[0]===cur))$('xpCat').value=cur}
 }
@@ -1606,7 +1680,8 @@ $('eRev').onclick=e=>{
 };
 /* ---------- Google 金鑰（只存在本機） ---------- */
 $('gKey').value=getKey();
-$('gKeySave').onclick=()=>{try{localStorage.setItem('trip-gkey',$('gKey').value.trim());toast($('gKey').value.trim()?'金鑰已儲存，重新搜尋後會出現「Google 評分」按鈕':'已清除')}catch(e){toast('無法儲存')};if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
+$('gKeySave').onclick=()=>{try{localStorage.setItem('trip-gkey',$('gKey').value.trim());toast($('gKey').value.trim()?'金鑰已儲存，重新搜尋後會出現「Google 評分」按鈕':'已清除')}catch(e){toast('無法儲存')};if(ex.items.length)renderExplore();if(sh.items.length)renderShops();Object.keys(geoCache).forEach(k=>delete geoCache[k]);locTried.clear();gErrShown=false;renderAll();loadWeather();if(getKey()&&S.stops.length)setTimeout(()=>toast('已有行程的位置可到下方按「用 Google 重新定位」'),2700)};
+$('gReloc').onclick=relocateAll;
 $('gKeyClear').onclick=()=>{try{localStorage.removeItem('trip-gkey')}catch(e){}$('gKey').value='';toast('已清除金鑰');if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
 renderRevChips();
 
