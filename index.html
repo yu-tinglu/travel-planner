@@ -135,6 +135,12 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 .bcf{display:flex;align-items:center;gap:8px;margin-top:2px}
 .bcf input{width:112px;padding:6px 8px}
 .refbox{background:var(--acc2);border-radius:14px;padding:12px}
+.tp{padding:10px 0;border-bottom:1px dashed var(--line)}.tp:last-child{border:0}
+.tp.warn .tpt b{color:var(--warn)}
+.tpk{margin-top:6px;font-size:13px}
+.tpk button{padding:4px 10px;font-size:12px;margin-left:6px}
+.mb{padding:10px 0;border-bottom:1px dashed var(--line)}.mb:last-child{border:0}
+.mbw{color:var(--warn);font-size:13px}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -358,11 +364,64 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
   <!-- 行李 -->
 
   <section id="tab-pack" class="hidden">
-    <div class="card">
-      <div class="row"><input id="pText" placeholder="新增物品，例如：護照"><button id="pAdd" style="flex:none">加入</button></div>
-      <div style="margin-top:8px"><button class="ghost" id="pPreset">加入常用清單</button></div>
+    <div class="seg" id="pkSeg"><button class="on" data-p="list">📋 行李</button><button data-p="tips">⚠️ 注意事項</button><button data-p="buy">🛍 必買</button></div>
+
+    <div data-g="pkSeg" data-p="list">
+      <div class="card">
+        <div class="row"><input id="pText" placeholder="新增物品，例如：護照"><button id="pAdd" style="flex:none">加入</button></div>
+        <div style="margin-top:8px"><button class="ghost" id="pPreset">加入常用清單</button></div>
+      </div>
+      <div class="card"><div class="note" id="pProg"></div><div id="pList"></div></div>
     </div>
-    <div class="card"><div class="note" id="pProg"></div><div id="pList"></div></div>
+
+    <div data-g="pkSeg" data-p="tips" class="hidden">
+      <div class="card">
+        <b>⚠️ 依你的行程給建議</b>
+        <div class="note">檢查目的地、日期、天氣，以及你排好的每天行程與預算，列出該注意的事和該準備的東西，物品可以一鍵加進行李清單。</div>
+        <button id="tpGo" style="width:100%;margin-top:10px">分析我的行程</button>
+        <div class="note" id="tpMsg" style="margin-top:6px"></div>
+      </div>
+      <div id="tpRes" class="hidden">
+        <div class="card"><b>📊 行程概況</b><div id="tpSum" style="margin-top:6px"></div></div>
+        <div id="tpCats"></div>
+        <button id="tpPackAll" style="width:100%;margin:8px 0">把建議準備的物品全部加入行李清單</button>
+        <div class="note">建議依一般情況與你的行程整理，各國入境、檢疫與安全規定會變動，出發前請以官方公告為準。</div>
+      </div>
+    </div>
+
+    <div data-g="pkSeg" data-p="buy" class="hidden">
+      <div class="card"><b>🛍 當地必買</b><div id="byHead" class="note" style="margin:4px 0 6px"></div><div id="byList"></div></div>
+      <div class="card">
+        <b>🔎 找購物地點</b>
+        <div class="note">從 OpenStreetMap 找目的地附近的店（依距離排序）。</div>
+        <div class="chips wrapchips" id="byTypes" style="margin-top:6px"></div>
+        <button class="ghost" id="byGo" style="width:100%;margin-top:6px">搜尋附近店家</button>
+        <div class="note" id="byMsg" style="margin-top:6px"></div>
+        <div id="byRes"></div>
+      </div>
+      <div class="card">
+        <b>📖 維基百科的特產條目</b>
+        <div class="note">用目的地搜尋維基百科的特產、名產相關條目，附簡介與照片。</div>
+        <button class="ghost" id="wkGo" style="width:100%;margin-top:6px">查特產條目</button>
+        <div class="note" id="wkMsg" style="margin-top:6px"></div>
+        <div id="wkRes"></div>
+      </div>
+      <div class="card">
+        <b>🧾 購物清單</b>
+        <div class="row" style="margin-top:6px"><input id="wsText" placeholder="想買什麼？例如：抹茶、藥妝"><button id="wsAdd" style="flex:none">加入</button></div>
+        <div id="wsList"></div>
+      </div>
+      <div class="card">
+        <b>🛃 帶回台灣要注意</b>
+        <ul class="note" style="padding-left:18px;margin:6px 0">
+          <li>酒類每人 1 公升以內、捲菸 200 支以內（限成年），入境行李總價值在新台幣 2 萬元內免稅，超過要申報（以海關公告為準）。</li>
+          <li>肉類及肉製品（肉乾、肉鬆、含肉的泡麵與調理包）、水果、活體植物與種子，多半禁止或需檢疫，請先查農業部動植物防疫檢疫署的規定。</li>
+          <li>液體、膏狀伴手禮與酒類要託運並包好；隨身行李的液體每瓶要在 100 毫升以內。</li>
+          <li>刀具不能隨身登機；行動電源與鋰電池要放隨身行李，不能託運。</li>
+          <li>退稅（如日本免稅、歐洲 VAT 退稅）制度會調整，要出示護照並保留單據，請依店家公告與當地最新規定為準。</li>
+        </ul>
+      </div>
+    </div>
   </section>
 
   <!-- 存檔 -->
@@ -415,7 +474,7 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
   <button data-t="plan"><b>🗓</b>行程</button>
   <button data-t="explore"><b>🧭</b>探索</button>
   <button data-t="budget"><b>💰</b>預算</button>
-  <button data-t="pack"><b>🧳</b>行李</button>
+  <button data-t="pack"><b>🧳</b>準備</button>
   <button data-t="data"><b>📦</b>存檔</button>
 </nav>
 
@@ -446,11 +505,12 @@ function ensureMap(id){
 const numIcon=(n,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color}">${n}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
 const EMO={'景點':'🏛','餐飲':'🍜','交通':'🚆','住宿':'🛏','購物':'🛍','其他':'📌'};
 const WD=['日','一','二','三','四','五','六'];
-let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],fq:[],lodging:{nights:'',price:''},alloc:{},exp:[],cur:'NT$',tripType:'round',origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
+let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],fq:[],lodging:{nights:'',price:''},alloc:{},exp:[],cur:'NT$',tripType:'round',origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3},wish:[]};
 function normalize(o){
-  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],fq:(o.fq||[]).filter(q=>q&&typeof q==='object').map(q=>({id:q.id||uid(),al:q.al||'',src:q.src||'其他',price:+q.price||0,bag:q.bag==='out'?'out':'in',fee:+q.fee||0,stop:['0','1','2'].includes(String(q.stop))?String(q.stop):'0',note:q.note||'',chosen:!!q.chosen})),lodging:Object.assign({nights:'',price:''},o.lodging||{}),alloc:Object.assign({},o.alloc||{}),exp:(o.exp||[]).filter(x=>x&&x.cat).map(x=>({id:x.id||uid(),cat:x.cat,amount:+x.amount||0,note:x.note||''})),cur:o.cur||'NT$',tripType:o.tripType==='one'?'one':'round',origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
+  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],wish:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],fq:(o.fq||[]).filter(q=>q&&typeof q==='object').map(q=>({id:q.id||uid(),al:q.al||'',src:q.src||'其他',price:+q.price||0,bag:q.bag==='out'?'out':'in',fee:+q.fee||0,stop:['0','1','2'].includes(String(q.stop))?String(q.stop):'0',note:q.note||'',chosen:!!q.chosen})),lodging:Object.assign({nights:'',price:''},o.lodging||{}),alloc:Object.assign({},o.alloc||{}),exp:(o.exp||[]).filter(x=>x&&x.cat).map(x=>({id:x.id||uid(),cat:x.cat,amount:+x.amount||0,note:x.note||''})),cur:o.cur||'NT$',tripType:o.tripType==='one'?'one':'round',origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
   (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
   (o.pack||[]).forEach(p=>{if(p&&p.text)r.pack.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
+  (o.wish||[]).forEach(p=>{if(p&&p.text)r.wish.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   return r;
 }
 function uid(){return Math.random().toString(36).slice(2,9)}
@@ -1029,6 +1089,7 @@ function bookletParts(){
   }
   const ch=S.fq.find(q=>q.chosen);
   b+=`<section class="pg"><h2 class="sec">預算總覽</h2><table>${CATS.filter(([k])=>pl[k]||S.alloc[k]).map(([k,l,em])=>`<tr><td>${em} ${l}</td><td>${money(pl[k])}${S.alloc[k]?' ／ '+money(+S.alloc[k]):''}</td></tr>`).join('')}<tr><td><b>合計</b></td><td><b>${money(total)}</b></td></tr></table>${ch?`<p class="m">已選機票：${esc(ch.al||'')}｜${stopLabel(ch.stop)}｜${S.pax} 人合計 ${money(qTotal(ch))}</p>`:''}`;
+  if(S.wish.length)b+=`<h2 class="sec" style="margin-top:28px">購物清單</h2>${S.wish.map(p=>`<div>${p.done?'☑':'☐'} ${esc(p.text)}</div>`).join('')}`;
   if(S.pack.length)b+=`<h2 class="sec" style="margin-top:28px">行李清單</h2>${S.pack.map(p=>`<div>${p.done?'☑':'☐'} ${esc(p.text)}</div>`).join('')}`;
   b+='</section></div>';
   return b;
@@ -1354,6 +1415,324 @@ $('gKey').value=getKey();
 $('gKeySave').onclick=()=>{try{localStorage.setItem('trip-gkey',$('gKey').value.trim());toast($('gKey').value.trim()?'金鑰已儲存，重新搜尋後會出現「Google 評分」按鈕':'已清除')}catch(e){toast('無法儲存')};if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
 $('gKeyClear').onclick=()=>{try{localStorage.removeItem('trip-gkey')}catch(e){}$('gKey').value='';toast('已清除金鑰');if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
 renderRevChips();
+
+/* ---------- 準備：注意事項 / 必買 ---------- */
+const TW_RE=/台北|臺北|新北|桃園|台中|臺中|台南|臺南|高雄|基隆|新竹|嘉義|宜蘭|花蓮|台東|臺東|屏東|墾丁|南投|苗栗|彰化|雲林|澎湖|金門|馬祖|台灣|臺灣/;
+const CTRY=[
+ {k:'jp',re:/東京|大阪|京都|名古屋|福岡|札幌|沖繩|日本|奈良|神戶|橫濱|北海道|廣島/,n:'日本',cur:'日圓',volt:'100V、雙平腳插頭（A 型），台灣電器大多可直接用',drive:'靠左行駛',tip:'不需要給小費',emg:'警察 110、火警與救護 119',
+  notes:['入境前可先在 Visit Japan Web 填好入境與海關資料，現場會快很多。','日本很多小店、神社周邊與鄉下仍偏好現金，帶足日圓現金。','電車與公共場所講電話被視為失禮，車廂請保持安靜、手機調靜音。','垃圾桶少，常需要把垃圾帶回住宿處分類丟。','地震與颱風季節請確認住宿的避難指示，並下載 Safety tips 之類的防災資訊。'],pack:['日圓現金','交通 IC 卡（Suica／ICOCA 手機版或實體卡）','小塑膠袋（裝垃圾）','毛巾或手帕（公廁常無擦手紙）']},
+ {k:'kr',re:/首爾|釜山|濟州|韓國|仁川|大邱/,n:'韓國',cur:'韓元',volt:'220V、圓兩腳插頭（C/F 型），台灣電器需要轉接頭',drive:'靠右行駛',tip:'不需要給小費',emg:'警察 112、火警與救護 119',
+  notes:['入境前可先填 Q-CODE 與電子入境卡（依當時規定），到了再填較花時間。','常見計程車、地鐵、街邊攤，可準備 T-money 交通卡。','部分傳統市場與小店只收現金。','韓國旅遊旺季或週末熱門餐廳要先預約。'],pack:['轉接頭（圓兩腳）','T-money 交通卡','保濕乳液（冬天很乾燥）']},
+ {k:'th',re:/曼谷|清邁|普吉|泰國|芭達雅|蘇美/,n:'泰國',cur:'泰銖',volt:'220V、插頭多為兩扁腳或圓兩腳，建議帶萬用轉接頭',drive:'靠左行駛',tip:'餐廳通常有收服務費，沒有的話可留 20–50 泰銖小費',emg:'旅遊警察 1155、緊急報案 191、救護 1669',
+  notes:['寺廟需穿著得體，肩膀與膝蓋要遮住，進入要脫鞋。','對王室不可有批評或不敬言行，這在當地是違法的。','注意計程車坑人，上車要求跳表或用叫車 App，避免被強迫去特定店家。','天氣炎熱，注意防曬與補水，雨季午後常有大雨。','水龍頭水不建議直接喝，喝瓶裝水。'],pack:['薄長袖與長褲（入寺廟用）','驅蚊液','防曬乳與帽子','拖鞋','萬用轉接頭']},
+ {k:'sg',re:/新加坡/,n:'新加坡',cur:'新加坡幣',volt:'230V、英式三方腳插頭（G 型），需轉接頭',drive:'靠左行駛',tip:'多數餐廳已含服務費，不需額外給',emg:'警察 999、救護與火警 995',
+  notes:['入境前需在 SG Arrival Card 線上填寫入境資料（依當時規定）。','口香糖禁止攜入與販售，亂丟垃圾、地鐵內飲食會被重罰。','電子菸與相關產品屬違法，不能攜帶入境。','室內冷氣很強，帶一件薄外套。'],pack:['英式轉接頭（三方腳）','薄外套','雨具','輕便好走的鞋']},
+ {k:'hk',re:/香港|澳門/,n:'港澳',cur:'港幣／澳門幣',volt:'220V、英式三方腳插頭（G 型），需轉接頭',drive:'靠左行駛',tip:'餐廳常加收一成服務費，不必另外給',emg:'緊急報案 999',
+  notes:['台灣旅客入境港澳需留意最新的入境規定與停留天數，出發前請確認。','港澳之間往來要過關，需帶護照，並預留過關時間。','夏季悶熱多雨，也要注意颱風警報（八號風球以上通常停班停課）。','人潮擁擠，走在街上注意隨身財物。'],pack:['英式轉接頭（三方腳）','八達通卡','雨具','小背包（前背防扒）']},
+ {k:'vn',re:/胡志明|河內|峴港|越南|會安|芽莊|富國島/,n:'越南',cur:'越南盾',volt:'220V、兩扁腳或兩圓腳，建議帶轉接頭',drive:'靠右行駛',tip:'沒有強制，可小額給',emg:'警察 113、火警 114、救護 115',
+  notes:['台灣旅客入境前請先確認簽證或電子簽證規定。','過馬路車流不斷，要慢慢、穩定地走，不要突然跑或停。','路邊騎士搶手機、包包的狀況不少，手機包包盡量背在遠離車道那側。','叫 Grab 比隨手攔計程車安全，也較透明。','匯率換算位數多，先抓個簡單的換算方式。'],pack:['Grab App（先裝好）','輕薄快乾衣物','驅蚊液','防曬','萬用轉接頭']},
+ {k:'ph',re:/馬尼拉|宿霧|菲律賓|長灘島|薄荷島/,n:'菲律賓',cur:'菲律賓披索',volt:'220V、兩扁腳或三腳，建議帶轉接頭',drive:'靠右行駛',tip:'餐廳常已含服務費，沒有的話可給 10%',emg:'緊急號碼 911',
+  notes:['入境前通常需填寫 eTravel 電子入境資料（依當時規定）。','颱風季（約 6–11 月）航班容易被取消，要留彈性。','交通擁擠，進出機場與跨島行程多預留時間。','海灘活動注意防曬、救生衣與保險範圍。'],pack:['防水袋','防曬乳','拖鞋','現金小鈔（跳島、小費用）']},
+ {k:'my',re:/吉隆坡|馬來西亞|檳城|沙巴|蘭卡威/,n:'馬來西亞',cur:'馬幣',volt:'240V、英式三方腳插頭（G 型）',drive:'靠左行駛',tip:'多已含服務費，不須額外給',emg:'緊急號碼 999',
+  notes:['入境前需填寫 MDAC 數位入境卡（依當時規定）。','清真寺與宗教場所需穿著保守，部分需包頭巾。','豬肉與酒類在部分餐廳與地區不提供，找餐廳時注意標示。','午後常有雷陣雨，帶輕便雨具。'],pack:['英式轉接頭（三方腳）','雨具','薄外套與長袖（進宗教場所用）']},
+ {k:'id',re:/峇里島|巴厘|印尼|雅加達|日惹/,n:'印尼（峇里島）',cur:'印尼盾',volt:'230V、圓兩腳插頭（C/F 型）',drive:'靠左行駛',tip:'餐廳可給 5–10% 小費',emg:'緊急號碼 112',
+  notes:['峇里島入境需付旅遊稅，並可能需填寫海關資料，先確認最新規定。','寺廟入場需穿紗籠與腰帶，租借或自備皆可。','騎機車請備國際駕照並戴安全帽，意外保險常不理賠無證駕駛。','不要隨便喝水龍頭水，也少吃生食與冰塊，以免腸胃不適。','猴子會搶眼鏡、手機，景點內不要拿食物與貴重品在手上。'],pack:['腸胃藥與口服電解質','驅蚊液','防曬乳','轉接頭（圓兩腳）','防水袋']},
+ {k:'cn',re:/上海|北京|成都|中國|廣州|深圳|杭州|西安|重慶/,n:'中國大陸',cur:'人民幣',volt:'220V、兩扁腳與三扁腳混用，多數插座可通用台灣兩腳插頭',drive:'靠右行駛',tip:'不需要給小費',emg:'警察 110、火警 119、救護 120',
+  notes:['台灣旅客需持有效「台胞證」入境，出發前確認證件效期與簽注。','當地多以支付寶、微信支付為主，請在出發前完成綁定並測試，國際信用卡也可綁定。','網路有防火牆，Google、LINE、Instagram 等服務可能不能使用，建議先準備 eSIM 或 VPN 等替代方案，並遵守當地法規。','地鐵、景點常要實名制與安檢，攜帶護照或台胞證。'],pack:['台胞證','支付寶／微信支付','eSIM 或網路方案','口罩與濕紙巾']},
+ {k:'euro',re:/巴黎|羅馬|巴塞隆納|阿姆斯特丹|維也納|法國|義大利|西班牙|荷蘭|奧地利|德國|柏林|慕尼黑|佛羅倫斯|威尼斯|米蘭|里斯本|葡萄牙|希臘|雅典/,n:'歐洲（申根區）',cur:'歐元',volt:'230V、圓兩腳插頭（C/F 型），需轉接頭',drive:'靠右行駛',tip:'餐廳常已含服務費，可視情形留零錢',emg:'歐盟統一緊急號碼 112',
+  notes:['台灣旅客短期可免簽進入申根區，但實施 ETIAS 後可能需線上申請授權，出發前請確認最新規定，護照剩餘效期也要夠。','熱門景點的扒手很多，背包拉鍊朝前、手機不要放在後口袋。','許多博物館與景點（如羅浮宮、梵蒂岡、聖家堂）需先線上預約時段。','餐廳可能不給免費水與免費冰塊，點水會算錢。','許多地方週日與午休時間商店會關門。'],pack:['轉接頭（圓兩腳）','防盜腰包或貼身包','舒適好走的鞋','薄外套（早晚溫差）']},
+ {k:'uk',re:/倫敦|英國|愛丁堡|曼徹斯特/,n:'英國',cur:'英鎊',volt:'230V、英式三方腳插頭（G 型），需轉接頭',drive:'靠左行駛',tip:'餐廳常加收 12.5% 服務費，沒有的話再給 10–12.5%',emg:'緊急號碼 999 或 112',
+  notes:['台灣旅客入境英國通常需先申請 ETA 電子旅行授權，出發前確認。','天氣多變，一天可能下好幾次雨，帶防風防水外套。','很多景點與博物館的熱門時段要先預訂。','過馬路要先看清楚車子從哪個方向來。'],pack:['英式轉接頭（三方腳）','輕便防水外套','折疊傘']},
+ {k:'ch',re:/蘇黎世|瑞士|琉森|因特拉肯|日內瓦/,n:'瑞士',cur:'瑞士法郎',volt:'230V、瑞士專用插頭（J 型），圓兩腳多數可用',drive:'靠右行駛',tip:'已含服務費，可湊整數',emg:'警察 117、火警 118、救護 144',
+  notes:['瑞士不在歐盟，使用瑞士法郎，物價高，餐飲預算要抓寬。','山區天氣變化快，登山鐵路與纜車依天氣停駛，行程要留彈性。','週日多數商店休息，要先把採買排開。','高海拔景點請留意高山症、紫外線與溫差。'],pack:['保暖外套','防曬與墨鏡','登山鞋或防滑鞋','轉接頭（瑞士型）']},
+ {k:'cz',re:/布拉格|捷克/,n:'捷克',cur:'捷克克朗',volt:'230V、圓兩腳插頭（C/E 型）',drive:'靠右行駛',tip:'餐廳可給 10% 小費，先看帳單有沒有已含服務費',emg:'歐盟統一緊急號碼 112',
+  notes:['捷克使用克朗而非歐元，不要在機場或觀光區兌換匯率差的地方。','舊城區計程車與換匯店常有高額收費，叫車用 Bolt 或 Uber。','熱門景點周邊小偷多，要保管好隨身物品。','路面多鵝卵石，鞋子要好走。'],pack:['轉接頭（圓兩腳）','好走的鞋','防盜包']},
+ {k:'us',re:/紐約|洛杉磯|舊金山|西雅圖|美國|夏威夷|芝加哥|拉斯維加斯|波士頓|華盛頓|邁阿密/,n:'美國',cur:'美元',volt:'120V、兩扁腳插頭，台灣電器大多可直接使用',drive:'靠右行駛',tip:'餐廳小費通常 18–22%，計程車與外送也要給',emg:'緊急號碼 911',
+  notes:['台灣旅客入境需 ESTA 電子旅行授權（免簽計畫）或簽證，出發前確認效期與申請狀態。','小費文化很重要，預算要把小費算進去，約為餐費的 18–22%。','租車需國際駕照加台灣駕照，並確認保險。','部分城市與地區夜間治安需要留意，避免單獨走偏僻街道，貴重物品不要留在車上。','醫療費用昂貴，建議買含海外醫療的旅遊保險。'],pack:['ESTA 或簽證確認頁','信用卡（可刷小費）','旅遊保險資料','國際駕照（租車）']},
+ {k:'ca',re:/溫哥華|加拿大|多倫多|蒙特婁|班夫/,n:'加拿大',cur:'加幣',volt:'120V、兩扁腳插頭，台灣電器大多可直接使用',drive:'靠右行駛',tip:'餐廳小費約 15–20%',emg:'緊急號碼 911',
+  notes:['台灣旅客入境加拿大通常需先申請 eTA 電子旅行授權，出發前確認。','秋冬天氣寒冷，注意保暖與防滑；山區有野生動物，遵守當地警示。','商品標價多不含稅與小費，結帳時會比標價高。'],pack:['eTA 確認頁','保暖外套與手套','防曬與墨鏡']},
+ {k:'au',re:/雪梨|墨爾本|澳洲|布里斯本|伯斯|黃金海岸/,n:'澳洲',cur:'澳幣',volt:'230V、斜八字三腳插頭（I 型），需轉接頭',drive:'靠左行駛',tip:'不強制，服務好可給 10%',emg:'緊急號碼 000',
+  notes:['台灣旅客入境澳洲需申請 ETA 電子旅行授權，出發前確認。','澳洲檢疫非常嚴格，食物、水果、種子、木製品入境一定要申報，否則罰款很重。','紫外線很強，一年四季都要防曬。','海灘只在有救生員的區域游泳，並留意旗幟標示。','南北半球季節相反，行李要依當地季節準備。'],pack:['澳洲型轉接頭（I 型）','防曬乳（高係數）與帽子','墨鏡','驅蟲液']},
+ {k:'nz',re:/奧克蘭|紐西蘭|基督城|皇后鎮/,n:'紐西蘭',cur:'紐幣',volt:'230V、斜八字三腳插頭（I 型），需轉接頭',drive:'靠左行駛',tip:'不須給小費',emg:'緊急號碼 111',
+  notes:['台灣旅客入境紐西蘭需申請 NZeTA 並繳旅遊稅，出發前確認。','紐西蘭生物安全管制很嚴，戶外用品（登山鞋、帳篷）與食物都要申報並可能被清潔檢查。','天氣一日多變，山區特別需要準備保暖與防風外套。','租車自駕要注意靠左行駛與長距離山路。'],pack:['I 型轉接頭','保暖防風外套','登山鞋（先洗乾淨再帶）','防曬']}
+];
+const ctryOf=d=>{d=d||'';if(TW_RE.test(d))return null;return CTRY.find(c=>c.re.test(d))||null};
+const isTW=d=>TW_RE.test(d||'');
+
+/* 景點關鍵字 → 提醒與物品 */
+const KW=[
+ {re:/寺|神社|廟|教堂|大教堂|清真寺|神宮|宮殿|聖殿/,tip:'宗教場所（%s）：服裝要整齊，肩膀與膝蓋要遮住，有些地方禁止拍照或需要脫鞋。',pack:['薄外套或披肩（入宗教場所用）']},
+ {re:/山|步道|峽谷|瀑布|登山|國家公園|火山|高原|富士/,tip:'戶外健行（%s）：先查天氣、日落時間與步道開放狀況，並告訴同行的人你的路線。',pack:['防滑好走的鞋','水與行動糧','簡易急救包','頭燈或手電筒']},
+ {re:/海灘|沙灘|海邊|浮潛|潛水|衝浪|水上|島/,tip:'水上活動（%s）：確認保險是否涵蓋水上活動，只在有救生員的區域游泳。',pack:['泳衣與毛巾','防水袋','防曬乳（防水型）','浮潛用品或租借']},
+ {re:/博物館|美術館|美術|藝廊|紀念館|博覽/,tip:'館舍類（%s）：常週一或特定日休館，並可能限制大型背包，熱門展覽要先預約。',pack:[],mon:true},
+ {re:/迪士尼|環球影城|樂園|遊樂園|主題樂園|海洋公園/,tip:'樂園類（%s）：先線上買票與下載官方 App，旺季人潮非常多，建議開園前抵達。',pack:['好走的鞋','行動電源','雨衣或輕便雨具','防曬用品']},
+ {re:/夜市|市場|商店街|市集|老街|錦市場/,tip:'夜市與市場（%s）：人潮擁擠，要顧好包包與手機，攤販常只收現金，有些店週休或週中不營業。',pack:['零錢與小鈔','濕紙巾與紙巾']},
+ {re:/溫泉|湯|SPA|spa/,tip:'泡湯（%s）：有刺青者要先確認是否能入場，飯後與喝酒後不宜泡太久，記得補水。',pack:['小毛巾（部分場所需自備）','泡湯用小袋']},
+ {re:/夜景|展望台|觀景台|摩天輪|天空樹|塔/,tip:'夜景與展望台（%s）：天氣差時視野不佳，先看天氣再訂票，熱門日落時段要提早排隊。',pack:['薄外套（高處風大）']},
+ {re:/滑雪|雪場|雪地|雪/,tip:'雪地活動（%s）：先確認雪況與開放狀態，並買含雪地運動的保險。',pack:['保暖防水外套與手套','護目鏡與帽子','暖暖包','護唇膏與防曬']},
+ {re:/百貨|購物|outlet|Outlet|商場|免稅|藥妝|商圈/,tip:'購物（%s）：免稅常需護照與單次消費門檻，行李空間與重量要預留。',pack:['折疊購物袋','護照（辦退稅用）','預留行李空間']},
+ {re:/動物園|水族館|牧場/,tip:'動物園與水族館（%s）：餵食與接觸動物要遵守園方規定，有些場地週一休園。',pack:['舒適步行鞋','防曬用品']},
+ {re:/船|遊輪|渡輪|郵輪/,tip:'搭船（%s）：怕暈船的人先吃暈車藥，天氣差時班次可能停駛，行程要留彈性。',pack:['暈船藥','薄外套（海上風大）']}
+];
+const weekMon=ds=>{if(!S.trip.start)return false;const d=new Date(S.trip.start+'T00:00');d.setDate(d.getDate()+ds);return d.getDay()===1};
+
+async function tripWeather(c){
+  const {start,end}=S.trip;if(!start||!c)return null;
+  const e=end||start,today=new Date(),s=new Date(start+'T00:00'),diff=(s-today)/864e5;
+  try{
+    let url,mode;
+    if(diff<=14&&diff>=-2){mode='f';url=`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto&start_date=${start}&end_date=${e}`}
+    else{mode='h';const sh=d=>{const x=new Date(d+'T00:00');x.setFullYear(x.getFullYear()-1);return x.toISOString().slice(0,10)};
+      url=`https://archive-api.open-meteo.com/v1/archive?latitude=${c.lat}&longitude=${c.lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto&start_date=${sh(start)}&end_date=${sh(e)}`}
+    const j=await jget(url),d=j.daily;if(!d||!d.time||!d.time.length)return null;
+    const mx=Math.max(...d.temperature_2m_max),mn=Math.min(...d.temperature_2m_min);
+    let rain,uv=null;
+    if(mode==='f'){rain=Math.max(...d.precipitation_probability_max.map(x=>x||0));uv=Math.max(...(d.uv_index_max||[0]))}
+    else rain=d.precipitation_sum.filter(x=>x>=1).length/d.time.length*100;
+    return{mode,mx:Math.round(mx),mn:Math.round(mn),rain:Math.round(rain),uv}
+  }catch(e){return null}
+}
+
+function buildTips(w){
+  const out={doc:[],plan:[],weather:[],place:[],culture:[],money:[],power:[],transport:[],safe:[]},pk=new Set(),stats=[];
+  const dest=(S.trip.dest||'').trim(),ct=ctryOf(dest),tw=isTW(dest),nd=numDays(),add=(c,t,warn)=>out[c].push({t,warn:!!warn}),pp=a=>(a||[]).forEach(x=>pk.add(x));
+  if(!dest)add('plan','尚未設定目的地，先到「出發」選好目的地，建議會更準。',true);
+  if(!S.trip.start)add('plan','尚未設定出發與回程日期，天氣與休館日建議會少一些。');
+  if(ct){
+    add('doc',`護照效期通常要有 6 個月以上，並確認入境規定（簽證、電子授權、入境卡）。`,true);
+    pp(['護照','護照影本與證件照','機票與訂房憑證','旅遊保險']);
+    add('doc','建議買旅遊平安險加海外醫療，並把保單號碼與緊急聯絡電話存在手機。');
+    ct.notes.forEach(n=>add('culture',n));
+    add('money',`當地貨幣：${ct.cur}。信用卡海外刷卡要先確認手續費與是否開通海外交易，現金不用換太多，抵達後再補。`);
+    add('money','小費：'+ct.tip+'。');
+    add('power','電壓與插頭：'+ct.volt+'。');
+    add('transport','交通：'+ct.drive+'，過馬路與租車自駕要特別留意。');
+    add('safe','緊急聯絡：'+ct.emg+'。外交部旅外緊急聯絡專線 +886-800-085-095（國外撥打）。');
+    pp(ct.pack);pp(['信用卡與現金','手機與充電器','行動電源','常備藥品','轉接頭','網路 eSIM 或漫遊方案']);
+    if(ct.k!=='cn')add('safe','出發前把證件拍照存雲端，護照遺失時補辦會快很多。');
+  }else if(dest&&!tw){
+    add('doc','這個目的地沒有收錄在內建資料中，請自行確認簽證、入境規定、電壓、緊急電話與小費習慣。',true);
+    pp(['護照','機票與訂房憑證','旅遊保險','轉接頭','信用卡與現金','手機與充電器','常備藥品']);
+  }else if(tw){
+    add('doc','國內旅行帶身分證即可，搭高鐵、飛機要記得帶證件。');
+    pp(['身分證','健保卡','手機與充電器','行動電源','常備藥品','雨具','防曬用品']);
+    add('transport','熱門連假與週末的高鐵與台鐵常客滿，先訂票；離島與山區要看天氣與航班。');
+    add('safe','遇緊急狀況撥 110（警察）、119（火警、救護）。');
+  }
+  /* 天氣 */
+  if(w){
+    const src=w.mode==='f'?'旅行期間預報':'去年同期歷史資料（僅供參考）';
+    add('weather',`${src}：約 ${w.mn}–${w.mx}°C，${w.mode==='f'?'降雨機率最高約 '+w.rain+'%':'約 '+w.rain+'% 的日子有明顯降雨'}。`);
+    if(w.mx>=30){add('weather','天氣偏熱，注意中暑與補水，行程盡量避開正午，室內與戶外交錯安排。',true);pp(['防曬用品','帽子與墨鏡','水壺或隨身水'])}
+    if(w.mn<=10){add('weather','天氣偏冷，要穿洋蔥式穿搭，並準備保暖外套、手套與圍巾。',true);pp(['保暖外套','手套與圍巾','暖暖包'])}
+    else if(w.mx-w.mn>=10){add('weather','早晚溫差大，帶一件薄外套。');pp(['薄外套'])}
+    if(w.rain>=40){add('weather','降雨機率高，準備雨具與防水鞋，行程多排一些室內備案。',true);pp(['雨具','防水外套或雨衣'])}
+    if(w.uv!=null&&w.uv>=6){add('weather','紫外線強，準備高係數防曬與墨鏡。');pp(['防曬用品'])}
+  }else if(S.trip.start&&dest)add('weather','天氣資料這次沒有載入成功，出發前請再查一次當地預報。');
+  /* 行程分析 */
+  const days=[];let nStops=0;
+  for(let d=0;d<nd;d++){const st=dayStops(d).slice().sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));days.push(st);nStops+=st.length}
+  S.stops.filter(s=>s.day>=nd).forEach(()=>{});
+  const orphan=S.stops.filter(s=>s.day>=nd).length;
+  if(!nStops)add('plan','還沒有排行程，先到「行程」或「探索」加入景點，建議會更準確。',true);
+  days.forEach((st,d)=>{
+    const lb=dayLabel(d);let km=0,maxLeg=0;
+    const xy=st.filter(hasXY);
+    for(let i=1;i<xy.length;i++){const k=distKm(xy[i-1],xy[i]);km+=k;maxLeg=Math.max(maxLeg,k)}
+    stats.push({d,lb,n:st.length,km});
+    if(st.length>=5)add('plan',`${lb}排了 ${st.length} 個點，偏滿，建議刪 1–2 個或拆到別天，才不會一直趕行程。`,true);
+    if(st.length&&st.length<=1&&nd>1&&d>0&&d<nd-1)add('plan',`${lb}只有 ${st.length} 個行程，很輕鬆，如果想多逛可以再加一兩個點。`);
+    if(st.length>1&&st.some(s=>!s.time))add('plan',`${lb}有 ${st.filter(s=>!s.time).length} 個行程還沒填時間，填了才能看出是否排得進去。`);
+    if(st.length>=2&&!st.some(s=>s.cat==='餐飲'))add('plan',`${lb}沒有排用餐，建議安排午餐與晚餐，熱門餐廳要先訂位。`);
+    if(km>30)add('transport',`${lb}景點之間的直線距離合計約 ${Math.round(km)} 公里，建議查好交通方式與轉乘時間。`,true);
+    else if(maxLeg>50)add('transport',`${lb}有一段約 ${Math.round(maxLeg)} 公里的移動，要預留較長的交通時間。`,true);
+    if(d===0&&st[0]&&st[0].time&&st[0].time<'14:00'&&nd>1)add('plan',`${lb}第一天${st[0].time}就有行程，若是剛抵達，要留 2–3 小時給入境、領行李與到飯店。`,true);
+    if(d===nd-1&&nd>1){const l=st[st.length-1];if(l&&l.time&&l.time>='13:00'&&!isTW(dest))add('plan',`${lb}是最後一天，${l.time}還有行程，離境要預留到機場前 3 小時，要確認航班時間。`,true)}
+    st.forEach(s=>{
+      KW.forEach(k=>{if(k.re.test(s.name)){add('place',k.tip.replace('%s',s.name));pp(k.pack);if(k.mon&&weekMon(d))add('place',`${s.name}在${lb}（週一），很多館舍週一休館，要先查開放日。`,true)}});
+    });
+    st.filter(s=>s.cat==='餐飲').forEach(s=>add('place',`${s.name}：熱門餐廳要先訂位，並確認公休日與是否只收現金。`));
+    st.filter(s=>s.cat==='購物').forEach(()=>pk.add('折疊購物袋'));
+  });
+  if(orphan)add('plan',`有 ${orphan} 個行程排在旅程天數之外，請確認日期或把行程搬到正確的日子。`,true);
+  /* 機票、住宿、預算 */
+  if(!tw&&dest){if(!S.fq.some(q=>q.chosen))add('plan','還沒選定機票，機票價格會浮動，建議先比價再訂，並確認行李額度。',true);}
+  if(dest&&nd>1&&!(+S.lodging.price))add('plan','住宿價格還沒填，預算會偏低，記得到「預算」填入每晚價格。',true);
+  if(dest&&nd>1)add('plan','住宿請確認入住與退房時間、取消規定，以及是否提供行李寄放。');
+  const bud=+S.trip.budget||0;
+  if(bud){const pl=planned(),sp=Object.values(pl).reduce((a,b)=>a+b,0);
+    if(sp>bud)add('money',`目前預估總花費 ${fmt(sp)} 已超出預算 ${fmt(bud)}，要調整行程或提高預算。`,true);
+    else if(sp>bud*.85)add('money',`目前預估花費已使用預算的 ${Math.round(sp/bud*100)}%，餘裕不多，記得預留機動金。`);
+    const al=S.alloc||{};CATS.forEach(([k,l])=>{const a=+al[k]||0;if(a&&pl[k]>a)add('money',`「${l}」預估 ${fmt(pl[k])} 超過分配的 ${fmt(a)}。`,true)});
+  }else add('money','還沒設定總預算，到「預算」填入金額，可以幫你控制分類花費。');
+  if(!tw&&dest)add('money','建議帶一張海外手續費低的信用卡與一張備用卡，分開放；手機也設好行動支付。');
+  if(S.pax>=3)add('plan',`${S.pax} 人同行，餐廳、計程車與房型要提前確認人數是否容納。`);
+  add('safe','出發前把行程、住宿地址與訂位資料下載存檔（可在「存檔」匯出或做旅遊小書），到當地網路不穩時也能看。');
+  const order=[['doc','📄 證件與手續'],['plan','🗓 行程安排'],['weather','🌦 天氣與穿著'],['place','📍 景點與活動'],['culture','🤝 當地習慣與規定'],['money','💳 金錢與預算'],['power','🔌 電壓與插頭'],['transport','🚆 交通'],['safe','🛟 安全與緊急']];
+  return{out,order,pk:[...pk],stats,ct,nd,nStops};
+}
+
+let tpState=null;
+function renderTips(r,w){
+  tpState=r;const {out,order,stats}=r;
+  const sm=[];
+  sm.push(`<div>目的地：<b>${esc(S.trip.dest||'未設定')}</b>｜${r.nd} 天｜${r.nStops} 個行程</div>`);
+  if(w)sm.push(`<div class="note">天氣：${w.mn}–${w.mx}°C${w.mode==='f'?'，降雨機率最高 '+w.rain+'%':'（去年同期參考）'}</div>`);
+  if(stats.length)sm.push(`<div class="note" style="margin-top:4px">${stats.map(s=>`${esc(s.lb)}：${s.n} 點${s.km>=1?' · 約 '+Math.round(s.km)+' km':''}`).join('<br>')}</div>`);
+  $('tpSum').innerHTML=sm.join('');
+  const packNew=r.pk.filter(t=>!S.pack.some(p=>p.text===t));
+  let h='';
+  order.forEach(([k,l])=>{if(!out[k].length)return;
+    h+=`<div class="card"><b>${l}</b>${out[k].map(i=>`<div class="tp ${i.warn?'warn':''}"><div class="tpt">${i.warn?'<b>⚠ </b>':'・'}${esc(i.t)}</div></div>`).join('')}</div>`});
+  h+=`<div class="card"><b>🎒 建議準備</b><div class="note">點一下就加入行李清單。</div><div class="tpk">${r.pk.map(t=>{const has=S.pack.some(p=>p.text===t);return `<span style="display:inline-block;margin:3px 0">${esc(t)}<button class="ghost" data-tpk="${esc(t)}" ${has?'disabled':''}>${has?'已在清單':'＋ 加入'}</button></span>`}).join('<br>')||'<span class="note">沒有額外建議。</span>'}</div></div>`;
+  $('tpCats').innerHTML=h;
+  $('tpPackAll').disabled=!packNew.length;
+  $('tpPackAll').textContent=packNew.length?`把建議準備的 ${packNew.length} 項全部加入行李清單`:'建議物品都已在行李清單';
+  $('tpRes').classList.remove('hidden');
+}
+$('tpGo').onclick=async()=>{
+  const btn=$('tpGo');btn.disabled=true;$('tpMsg').textContent='分析中…';
+  let w=null;
+  try{const d=(S.trip.dest||'').trim();if(d&&S.trip.start){const c=await geocodeCached(d);w=await tripWeather(c)}}catch(e){}
+  renderTips(buildTips(w),w);
+  $('tpMsg').textContent='';btn.disabled=false;btn.textContent='重新分析';
+};
+$('tpCats').onclick=e=>{const b=e.target.closest('[data-tpk]');if(!b)return;addPack(b.dataset.tpk);save();renderPack();b.disabled=true;b.textContent='已在清單';
+  if(tpState){const n=tpState.pk.filter(t=>!S.pack.some(p=>p.text===t)).length;$('tpPackAll').disabled=!n;$('tpPackAll').textContent=n?`把建議準備的 ${n} 項全部加入行李清單`:'建議物品都已在行李清單'}};
+$('tpPackAll').onclick=()=>{if(!tpState)return;tpState.pk.forEach(addPack);save();renderPack();renderTips(tpState,null);$('tpRes').scrollIntoView({block:'start'});toast('已加入行李清單')};
+
+/* ---------- 當地必買 ---------- */
+const NOMEAT='⚠ 含肉類或乳製品，帶回台灣多半不能入境，請先查檢疫規定';
+const MB_C={
+ jp:[['抹茶與日本茶','食品','抹茶粉、茶包、抹茶點心，京都、宇治一帶最有名。'],['藥妝','藥妝','感冒藥、眼藥水、貼布、保養品，要注意部分藥品有攜帶量限制。'],['零食與點心','食品','Royce 生巧克力、東京香蕉、白色戀人等，各地有地區限定。'],['文具與生活雜貨','雜貨','無印良品、LOFT、伊東屋，文具與收納品很多。'],['日本酒與燒酎','酒類','每人限帶 1 公升內，要包好託運，超過要申報。']],
+ kr:[['韓國保養品與美妝','美妝','Olive Young 常有活動，面膜、防曬、彩妝都值得逛。'],['韓國海苔與零食','食品','海苔、蜂蜜奶油杏仁、泡麵，伴手禮首選。'],['人蔘與紅蔘製品','保健','紅蔘茶、紅蔘糖，注意含量與是否有檢驗標示。'],['韓國燒酒與馬格利','酒類','每人限 1 公升內，馬格利保存期限短，不適合久放。'],['韓流周邊','雜貨','明洞、弘大、聖水有各種周邊店與選物店。']],
+ th:[['泰國乳膠寢具','生活','乳膠枕與床墊，重量大，通常要買完直接託運或寄送。'],['香氛與按摩精油','生活','香茅、檸檬草、泰式按摩油，注意液體要託運。'],['泰式零食','食品','芒果乾、榴槤乾、椰子片，要確認包裝完整。'],['泰絲與手工藝品','雜貨','絲巾、大象雜貨，清邁夜市較有選擇。'],['泰國藥膏與牙膏','藥妝','青草藥膏、薄荷棒，要看是否可帶回台灣。']],
+ sg:[['肉骨茶包與咖椰醬','食品','肉骨茶為調味包，需確認含不含肉成分；咖椰醬可帶，要看標示。'],['TWG 茶與 BengaWan 食品','食品','TWG 茶葉禮盒、新加坡咖啡包、白咖啡。'],['新加坡雜貨','雜貨','魚尾獅周邊、娘惹瓷器、土産店的小物。'],['虎標萬金油','藥品','萬金油、清涼油，記得放在隨身行李並確認攜帶量。'],['新加坡麵食調味包','食品','叻沙醬、辣椒螃蟹醬，要看是否含肉類。']],
+ hk:[['港式點心與餅乾','食品','奇華、美心、鮮肉月餅，要注意保存期限與肉製品。'],['港式茶葉與花茶','食品','鴛鴦、港式奶茶包、龍井、普洱。'],['港式配件與雜貨','雜貨','旺角、深水埗的電子與生活雜貨。'],['港式醬料','食品','XO 醬、蠔油，XO 醬含海鮮，帶回台灣要看檢疫規定。']],
+ vn:[['越南咖啡','食品','G7、中原咖啡、滴漏壺，是熱門伴手禮。'],['腰果與芒果乾','食品','腰果、榴槤乾、水果乾，要看標示是否合規。'],['越式手工藝','雜貨','漆器、編織包、刺繡畫、斗笠。'],['奧黛與訂製衣服','服飾','會安可訂製，需要預留 1–3 天製作時間。'],['魚露與香料','食品','要密封好並託運，部分航班禁止液體隨身。']],
+ ph:[['芒果乾','食品','7D 芒果乾是經典伴手禮，各大超市都買得到。'],['椰子製品與椰子油','食品','椰子糖、椰子油，要注意液體要託運。'],['香蕉脆片','食品','甜甜脆脆，適合分送同事。'],['菲律賓手工藝','雜貨','編織包、木雕與貝殼飾品。']],
+ my:[['白咖啡 OLDTOWN','食品','怡保白咖啡三合一，是人氣伴手禮。'],['肉骨茶包','食品','要確認是否含肉，不含肉成分的調味包較無問題。'],['沙巴與檳城特產','食品','燕窩、榴槤糖、手工小吃，要注意保存期限。'],['馬來手工藝','雜貨','蠟染布、錫器，吉隆坡的中央藝術坊有各種手工藝。']],
+ id:[['峇里島手工藝','雜貨','木雕、編織包、銀飾，烏布與烏魯瓦圖一帶有很多店。'],['精油與香氛蠟燭','生活','精油要密封並託運，並避免放在隨身行李。'],['印尼咖啡','食品','貓屎咖啡、峇里咖啡豆，注意購買管道與價格。'],['沙龍與紗籠','服飾','常見的印尼傳統布料，輕便又好帶。'],['巧克力與零食','食品','在地品牌的巧克力與香料點心。']],
+ cn:[['茶葉','食品','龍井、普洱、鐵觀音，到茶莊要小心被推銷。'],['中式點心與特產','食品','依城市而異，如上海的蟹殼黃、成都的蜀繡與花椒。'],['絲綢與手工藝','雜貨','蘇州、杭州一帶有絲綢製品與刺繡。'],['中藥材與保健品','保健','帶回台灣有管制，須查清楚。'],['成都辣椒與火鍋底料','食品','底料常含牛油與肉，帶回台灣需確認檢疫規定。']],
+ euro:[['當地巧克力與糖果','食品','瑞士、比利時、法國的巧克力是熱門伴手禮。'],['橄欖油與香料','食品','義大利、西班牙的橄欖油，液體要託運並包好。'],['葡萄酒與烈酒','酒類','每人 1 公升內，要包好託運，易碎。'],['手工藝與紀念品','雜貨','法國香氛皂、威尼斯玻璃、巴塞隆納的磁磚畫。'],['乳酪與火腿','食品',NOMEAT]],
+ uk:[['英國茶','食品','TWG、Twinings、Fortnum & Mason 紅茶禮盒，送禮很體面。'],['餅乾與巧克力','食品','Walkers 奶油酥餅、Cadbury 巧克力。'],['哈利波特與博物館周邊','雜貨','大英博物館、哈利波特商店有各種紀念品。'],['威士忌','酒類','蘇格蘭威士忌每人 1 公升內，須託運並包好。']],
+ ch:[['瑞士巧克力','食品','Lindt、Sprüngli、Läderach，是最受歡迎的伴手禮。'],['瑞士刀與手錶','雜貨','刀具不能隨身登機，要放託運行李；買手錶要保留單據。'],['瑞士咳嗽糖與香草糖','食品','Ricola 等，是小而輕的伴手禮。'],['乳酪','食品',NOMEAT]],
+ cz:[['捷克水晶與玻璃','雜貨','波西米亞水晶製品，要包好防碎。'],['捷克啤酒與烈酒','酒類','碧根酒（Becherovka），每人限 1 公升。'],['木製玩具與木偶','雜貨','傳統的木偶與手工玩具，布拉格舊城有很多店。'],['石榴石飾品','飾品','捷克石榴石飾品，有名但要選信譽好的店。']],
+ us:[['美國保健品與維他命','保健','藥局與 Costco 的維他命與魚油價格好，注意數量限制。'],['美國品牌服飾與運動鞋','服飾','Outlet 常有折扣，Nike、Levi\'s、Coach 都值得比價。'],['3C 與電子產品','3C','Apple 產品、Switch 遊戲，價格與保固須留意。'],['當地紀念品與零食','食品','巧克力、堅果、咖啡豆、各州特色的醬料。'],['Trader Joe\'s 與 Costco 商品','食品','環保袋、零食、調味料。']],
+ ca:[['楓糖漿','食品','加拿大最經典的伴手禮，液體要託運並包好。'],['冰酒','酒類','每人 1 公升內，須託運，注意包裝。'],['加拿大保養品與保健品','保健','常見有 Lululemon、Roots、羊毛製品。'],['原住民手工藝','雜貨','Inuit 手工藝品，要看真偽與產地證明。']],
+ au:[['保健品與羊皮靴','保健','Swisse、Blackmores 保健品，UGG 羊皮靴，要看好價格與正品。'],['綿羊油與蜂蜜','美妝','綿羊油、麥蘆卡蜂蜜，蜂蜜要確認可否帶回台灣。'],['澳洲堅果與巧克力','食品','夏威夷豆、Tim Tam 餅乾，是人氣伴手禮。'],['袋鼠與無尾熊玩偶','雜貨','要避免購買使用保育類動物製品的商品。']],
+ nz:[['麥蘆卡蜂蜜','食品','紐西蘭最有名的特產，要看認證等級與標示。'],['羊毛製品與羊皮','服飾','羊毛毯、羊毛襪與保暖衣物。'],['保健品與初乳','保健','注意含乳製品成分，帶回台灣要看規定。'],['毛利手工藝與綠石','飾品','綠石（玉石）要看是否正規。']]
+};
+const MB_X={
+ '京都':[['八橋與和菓子','食品','生八橋、羊羹、和菓子，是京都最具代表性的伴手禮。'],['西陣織與京扇子','雜貨','在地手工藝，適合送禮或自用。']],
+ '大阪':[['章魚燒與大阪燒周邊','食品','章魚燒粉、大阪燒醬料，道頓堀有很多伴手禮店。'],['大阪限定點心','食品','551 蓬萊肉包不能帶回台灣（含肉），可以買其他的甜點。']],
+ '東京':[['東京香蕉與雷門名物','食品','東京香蕉、人形燒，到處都能買到。'],['原宿與澀谷選物','雜貨','潮流服飾、選物店、動漫周邊。']],
+ '札幌':[['北海道甜點','食品','Royce 生巧克力、LeTAO 起司蛋糕、白色戀人，要確認含乳製品是否可入境。'],['海鮮乾貨與昆布','食品','昆布、干貝、乾燥魚，要看是否有檢疫證明。']],
+ '沖繩':[['紅芋塔與黑糖','食品','紅芋塔、黑糖、金楚糕，是沖繩代表性點心。'],['泡盛酒與沖繩雜貨','酒類','每人限 1 公升內，並包好託運。']],
+ '福岡':[['明太子','食品','博多明太子是名物，但要確認冷藏與海鮮可否入境。'],['博多通りもん','食品','代表性點心，也是機場常見伴手禮。']],
+ '名古屋':[['鰻魚派與味噌製品','食品','名古屋名物，注意含肉成分與保存方式。'],['手羽先調味料','食品','味付粉可帶，肉類本身則不行。']],
+ '首爾':[['明洞與弘大美妝','美妝','Olive Young、Innisfree、Etude House。'],['首爾韓牛調味','食品','肉類不能帶，但調味包可以看標示。']],
+ '濟州':[['橘子相關商品','食品','巧克力、橘子醋、橘子果凍，生鮮水果不可帶回台灣。'],['濟州火山石與手工藝','雜貨','石爺爺（돌하르방）小物，是島上象徵。']],
+ '釜山':[['魚板（어묵）','食品','釜山名物，有些為冷藏，要看保存與是否含肉。'],['釜山海苔','食品','適合送禮，也不重。']],
+ '曼谷':[['恰圖恰週末市場雜貨','雜貨','泰絲、手工包、香氛，殺價是常態。'],['泰國藥妝','藥妝','Boots、Watsons 有各種品牌。']],
+ '清邁':[['手工布與銀飾','雜貨','週日夜市的山地民族手工藝。'],['清邁咖啡豆','食品','北部咖啡是近年熱門選擇。']],
+ '普吉':[['海島風周邊與椰子商品','雜貨','椰子製品、貝殼飾品、泳裝。'],['普吉老城手工藝','雜貨','峇峇娘惹風格的點心與小物。']],
+ '巴黎':[['馬卡龍與法式甜點','食品','Ladurée、Pierre Hermé 的馬卡龍，易碎要手提。'],['法式香氛與藥妝','美妝','藥妝店（Pharmacie）的保養品，像 Bioderma、Caudalie。'],['法式芥末與果醬','食品','Maille 芥末與 Bonne Maman 果醬，要包好託運。']],
+ '羅馬':[['義大利橄欖油與義麵','食品','橄欖油、義麵、番茄醬，液體要託運。'],['皮件與手工藝','雜貨','佛羅倫斯的皮革，羅馬的手工藝品，要看好真偽。']],
+ '巴塞隆納':[['西班牙橄欖油與香料','食品','Saffron、橄欖油、海鹽，液體要包好託運。'],['高第周邊與瓷磚畫','雜貨','聖家堂與桂爾公園的周邊小物。'],['西班牙火腿','食品',NOMEAT]],
+ '阿姆斯特丹':[['荷蘭起司','食品',NOMEAT],['荷蘭木鞋與代爾夫特陶器','雜貨','陶器要包好防碎。'],['鬱金香球根','雜貨','球根屬植物，帶回台灣通常需檢疫許可，勿自行攜帶。']],
+ '維也納':[['莫札特巧克力與薩赫蛋糕','食品','Sacher 薩赫蛋糕禮盒，保存期限要看。'],['維也納咖啡與茶','食品','Julius Meinl 的咖啡與茶葉。']],
+ '倫敦':[['哈洛斯百貨伴手禮','食品','Harrods 茶、餅乾與糖果禮盒。'],['大英博物館與市集周邊','雜貨','Camden、Borough Market 的手作品。']],
+ '布拉格':[['溫泉餅與捷克啤酒','食品','溫泉餅（Oplatky）是傳統甜點，可以當伴手禮。']],
+ '蘇黎世':[['Lindt 巧克力工廠直營店','食品','工廠直營店有各種口味與折扣。']],
+ '紐約':[['Levain 餅乾與紐約紀念品','食品','餅乾要當天食用，紀念品在時代廣場與中央車站。'],['Apple 與運動用品','3C','紐約價格含稅差異，請以當時稅額為準。']],
+ '洛杉磯':[['Outlet 與運動品牌','服飾','City of Commerce、Citadel Outlets 有大量品牌折扣。'],['In-N-Out 周邊','雜貨','只買周邊，漢堡本身不要帶。']],
+ '舊金山':[['Ghirardelli 巧克力','食品','漁人碼頭有直營店。'],['Anchor 啤酒與酸種麵包周邊','食品','酸種麵包要當天食用，不適合長途帶。']],
+ '西雅圖':[['星巴克第一家店與咖啡豆','食品','派克市場的星巴克第一店有限定商品。'],['西北地區紀念品','雜貨','派克市場的手工與魚類（魚類不可帶回台灣）。']],
+ '溫哥華':[['楓糖與三文魚製品','食品','鮭魚類需看包裝與檢疫，不一定可帶回台灣。']],
+ '雪梨':[['袋鼠與無尾熊雜貨','雜貨','The Rocks 市集有許多紀念品。'],['UGG 與保健品','服飾','要確認品牌與正品。']],
+ '墨爾本':[['咖啡豆與咖啡文化周邊','食品','墨爾本的咖啡文化很強，咖啡豆是好選擇。'],['維多利亞市場特產','食品','市場有各種手作與食品，肉製品與奶酪不能帶。']],
+ '奧克蘭':[['羊毛製品與紀念品','服飾','羊毛襪、羊毛毯與保暖衣物。']],
+ '澳門':[['杏仁餅與蛋塔','食品','澳門的杏仁餅與肉鬆餅、蛋塔，要確認是否含肉。']],
+ '香港':[['奇華餅家與美心月餅','食品','禮盒類的熱門選擇，要注意肉製品與蛋奶成分。']],
+ '上海':[['上海特產','食品','南翔小籠包調味、城隍廟的點心與茶葉。']],
+ '北京':[['景泰藍與茶具','雜貨','潘家園古玩市集要小心仿品。']],
+ '成都':[['川劇臉譜與蜀繡','雜貨','成都的傳統手工藝。']],
+ '胡志明':[['濱城市場雜貨','雜貨','咖啡、漆器、斗笠等。']],
+ '河內':[['河內手工藝與茶','雜貨','絲綢與茶葉。']],
+ '峴港':[['會安燈籠與手工藝','雜貨','燈籠、陶瓷與手工布。']],
+ '馬尼拉':[['菲律賓紀念品與椰子商品','雜貨','Greenhills 與 Divisoria 市場。']],
+ '宿霧':[['宿霧芒果乾與珍珠飾品','食品','機場附近的 7D 芒果乾與手工藝。']],
+ '峇里島':[['烏布市場手工藝','雜貨','紡織品、木雕、椰殼包。']],
+ '吉隆坡':[['雙子星塔與茨廠街紀念品','雜貨','白咖啡、錫器、燕窩。']],
+ '新加坡':[['ION 與烏節路精品','雜貨','要留意 GST 退稅條件。']]
+};
+const BUY_TYPES=[['pharm','藥妝','node["shop"~"^(chemist|cosmetics|beauty)$"]'],['gift','伴手禮','node["shop"~"^(gift|souvenir|confectionery|tea|chocolate)$"]'],['dept','百貨商場','nwr["shop"~"^(department_store|mall)$"]'],['super','超市','nwr["shop"="supermarket"]'],['duty','免稅店','nwr["shop"="duty_free"]'],['mkt','市集','nwr["amenity"="marketplace"]']];
+let buyType='pharm',buyRes=[];
+function mbFor(dest){
+  const d=(dest||'').trim();if(!d)return null;
+  const hit=Object.keys(MB_X).find(k=>d.includes(k)||k.includes(d));
+  const ct=ctryOf(d);
+  const base=ct?(MB_C[ct.k]||[]):[];
+  const x=hit?MB_X[hit]:[];
+  return base.length||x.length?{ct,items:x.concat(base)}:null;
+}
+function renderBuy(){
+  const d=(S.trip.dest||'').trim();
+  $('byTypes').innerHTML=BUY_TYPES.map(([k,l])=>`<button class="chip ${buyType===k?'on':''}" data-by="${k}">${l}</button>`).join('');
+  if(!d){$('byHead').textContent='先在「出發」設定目的地，這裡會列出當地必買。';$('byList').innerHTML='';return}
+  const r=mbFor(d);
+  if(!r){$('byHead').textContent='內建資料裡沒有「'+d+'」，可以用下面的搜尋工具找當地特產與商店。';$('byList').innerHTML='';return}
+  $('byHead').textContent='整理「'+d+'」常見的必買，請依預算與喜好挑選，價格與品牌可能會變。';
+  $('byList').innerHTML=r.items.map(([n,tag,desc,warn],i)=>{
+    const w=warn||(/肉|乳酪|起司|火腿|檢疫/.test(desc)&&/不能|不可|禁止|檢疫/.test(desc)?'':'');
+    const inList=S.wish.some(x=>x.text===n);
+    return `<div class="mb"><div><span class="tag">${esc(tag)}</span><b>${esc(n)}</b></div><div class="note">${esc(desc)}</div>${w?`<div class="mbw">${esc(w)}</div>`:''}<div class="xact"><button class="ghost" data-mbw="${esc(n)}" ${inList?'disabled':''}>${inList?'已加入清單':'＋ 加入購物清單'}</button><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(d+' '+n+' 推薦 伴手禮')}">🔍 搜尋</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(d+' '+n+' 心得 PTT OR Dcard')}">💬 心得</a></div></div>`}).join('');
+}
+$('byTypes').onclick=e=>{const b=e.target.closest('[data-by]');if(!b)return;buyType=b.dataset.by;renderBuy()};
+$('byList').onclick=e=>{const b=e.target.closest('[data-mbw]');if(!b)return;wishAdd(b.dataset.mbw);renderBuy()};
+$('byGo').onclick=async()=>{
+  const d=(S.trip.dest||'').trim();if(!d){$('byMsg').textContent='請先設定目的地。';return}
+  const t=BUY_TYPES.find(x=>x[0]===buyType);$('byMsg').textContent='搜尋中…';$('byRes').innerHTML='';
+  try{
+    const c=await geocodeCached(d);if(!c){$('byMsg').textContent='找不到「'+d+'」的位置。';return}
+    const els=await overpass(`[out:json][timeout:25];(${t[2]}["name"](around:4000,${c.lat},${c.lng}););out center 80;`);
+    const seen=new Set();
+    buyRes=els.map(e=>{const p=centerOf(e);if(!p||!e.tags)return null;const nm=e.tags['name:zh']||e.tags['name:zh-TW']||e.tags.name;return nm&&!seen.has(nm)&&seen.add(nm)?{name:nm,lat:p.lat,lng:p.lng,tags:e.tags,dist:distKm(c,p)}:null}).filter(Boolean).sort((a,b)=>a.dist-b.dist).slice(0,12);
+    $('byMsg').textContent=buyRes.length?`找到 ${buyRes.length} 家，依離市中心距離排序（資料來自 OpenStreetMap）。`:'附近沒有查到，可以換個類型或到地圖軟體搜尋。';
+    $('byRes').innerHTML=buyRes.map((v,i)=>`<div class="mb"><div><span class="tag">${t[1]}</span><b>${esc(v.name)}</b> <span class="note">· ${v.dist<1?Math.round(v.dist*1000)+' m':v.dist.toFixed(1)+' km'}</span></div>${v.tags.opening_hours?`<div class="note">營業：${esc(v.tags.opening_hours)}</div>`:''}<div class="xact"><button data-bya="${i}">＋ 加入行程</button><a class="lnk" data-gm="${esc(v.name)}" data-gmp="${esc(d)}" data-lat="${v.lat}" data-lng="${v.lng}" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+d)}">📍 Google 地圖</a></div></div>`).join('');
+  }catch(e){$('byMsg').textContent='目前查不到資料（網路或資料來源忙碌），請稍後再試。'}
+};
+$('byRes').onclick=e=>{const b=e.target.closest('[data-bya]');if(!b)return;const v=buyRes[+b.dataset.bya];if(!v)return;
+  S.stops.push({id:uid(),day:day,time:'',name:v.name,cat:'購物',cost:0,note:'',desc:'',lat:v.lat,lng:v.lng});save();renderAll();b.disabled=true;b.textContent='已加入 ✓';toast('已加入第 '+(day+1)+' 天行程')};
+$('wkGo').onclick=async()=>{
+  const d=(S.trip.dest||'').trim();if(!d){$('wkMsg').textContent='請先設定目的地。';return}
+  $('wkMsg').textContent='查詢中…';$('wkRes').innerHTML='';
+  try{
+    const qs=[d+' 特產',d+' 名產',d+' 伴手禮'];
+    const rs=await Promise.all(qs.map(q=>jget(WP+'&generator=search&gsrlimit=6&gsrsearch='+encodeURIComponent(q)+'&prop=extracts|pageimages'+WP_PROPS).catch(()=>null)));
+    const seen=new Set(),list=[];
+    rs.forEach(j=>{if(!j)return;pagesOf(j).sort((a,b)=>(a.index||0)-(b.index||0)).forEach(p=>{if(!seen.has(p.pageid)){seen.add(p.pageid);list.push(p)}})});
+    const L=list.slice(0,8);
+    $('wkMsg').textContent=L.length?`找到 ${L.length} 筆相關條目（維基百科）。`:'沒有找到相關條目。';
+    $('wkRes').innerHTML=L.map(p=>`<div class="mb" style="display:flex;gap:10px">${p.thumbnail?`<img src="${esc(p.thumbnail.source)}" alt="" loading="lazy" style="width:76px;height:76px;object-fit:cover;border-radius:10px;flex:none">`:''}<div><b>${esc(p.title)}</b><div class="note">${esc(clip(p.extract,90))}</div><a class="lnk" href="${esc(wpUrl(p.title))}" target="_blank" rel="noopener">維基百科</a> <button class="ghost tpk" data-wkw="${esc(p.title)}">＋ 加入購物清單</button></div></div>`).join('');
+  }catch(e){$('wkMsg').textContent='目前查不到資料，請稍後再試。'}
+};
+$('wkRes').onclick=e=>{const b=e.target.closest('[data-wkw]');if(!b)return;wishAdd(b.dataset.wkw);b.disabled=true;b.textContent='已加入'};
+function wishAdd(t){t=(t||'').trim();if(!t||S.wish.some(x=>x.text===t))return;S.wish.push({id:uid(),text:t,done:false});save();renderWish()}
+function renderWish(){
+  $('wsList').innerHTML=S.wish.length?S.wish.map(p=>`<div class="pk ${p.done?'done':''}"><input type="checkbox" data-wd="${p.id}" ${p.done?'checked':''}><span class="grow">${esc(p.text)}</span><button class="x" data-wx="${p.id}">✕</button></div>`).join(''):'<div class="note" style="margin-top:6px">還沒有項目。</div>';
+}
+$('wsAdd').onclick=()=>{wishAdd($('wsText').value);$('wsText').value='';renderBuy()};
+$('wsText').addEventListener('keydown',e=>{if(e.key==='Enter')$('wsAdd').click()});
+$('wsList').onclick=e=>{
+  const c=e.target.closest('[data-wd]'),x=e.target.closest('[data-wx]');
+  if(c){const w=S.wish.find(v=>v.id===c.dataset.wd);if(w){w.done=c.checked;save();renderWish()}}
+  if(x){S.wish=S.wish.filter(v=>v.id!==x.dataset.wx);save();renderWish();renderBuy()}
+};
+document.querySelector('[data-t="pack"]').addEventListener('click',()=>{renderBuy();renderWish()});
+$('pkSeg').addEventListener('click',e=>{if(e.target.closest('[data-p="buy"]')){renderBuy();renderWish()}});
+renderWish();
 
 $('heroArt').innerHTML=SCENE;
 syncExtra();
