@@ -108,6 +108,17 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 .pimg{flex:none;width:72px;height:72px;border-radius:16px;overflow:hidden;background:var(--acc2)}
 .pimg:empty{display:none}.pimg img{width:100%;height:100%;object-fit:cover;display:block}
 .ptitle{font:700 20px var(--serif);color:var(--acc)}
+#gmSheet{position:fixed;inset:0;z-index:60}
+.gm-back{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.gm-box{position:absolute;left:0;right:0;bottom:0;height:82vh;max-width:680px;margin:0 auto;background:var(--card);border-radius:22px 22px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 30px rgba(0,0,0,.3)}
+.gm-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.gm-head b{flex:1;font:700 16px var(--serif);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gmFrame{flex:1;border:0;width:100%;background:#e9e1cf}
+.grev{margin-top:8px}
+.rv{border-top:1px dashed var(--line);padding:8px 0;font-size:13px}
+.clamp3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.revrow{margin-top:8px;display:flex;flex-wrap:wrap;gap:2px 0;align-items:center}
+.mapG{width:100%;height:340px;border:0;border-radius:14px;margin-top:8px;background:#e9e1cf}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -166,12 +177,15 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>🗺 路線示意圖</b>
+        <b>🗺 路線地圖</b>
         <div class="row" style="flex:none;gap:6px"><button class="chip on" id="scDay">當天</button><button class="chip" id="scAll">全程</button></div>
       </div>
+      <div class="chips" style="margin-top:6px"><button class="chip on" id="mpGg">Google 地圖</button><button class="chip" id="mpOsm">OpenStreetMap</button></div>
+      <iframe id="mapG" class="mapG hidden" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       <div id="mapLeaf" class="leaf"></div>
       <div id="mapBox" style="margin-top:8px"></div>
       <div class="note" id="mapNote" style="margin-top:6px"></div>
+      <a id="mapGOpen" class="btn hidden" target="_blank" rel="noopener" style="margin-top:8px" href="#">↗ 用 Google 地圖開啟／導航</a>
       <button class="ghost hidden" id="geoBtn" style="margin-top:8px">補齊座標（OpenStreetMap）</button>
     </div>
 
@@ -206,6 +220,8 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
         <button class="chip on" data-t="sight">🏛 景點</button>
         <button class="chip on" data-t="culture">🎎 人文特色</button>
       </div>
+      <label>評論來源（可複選，會顯示在每個結果下方）</label>
+      <div class="chips" id="eRev"></div>
       <button id="eGo" style="margin-top:6px;width:100%">搜尋推薦</button>
       <div class="note" id="eMsg" style="margin-top:6px"></div>
     </div>
@@ -304,6 +320,16 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
       <div class="row" style="margin-top:8px"><button class="ghost" id="exp">產生文字</button><button id="cp" class="hidden">複製</button></div>
       <textarea id="expOut" class="hidden" readonly></textarea>
     </div>
+    <div class="card">
+      <b>⭐ Google 評分與評論（選填）</b>
+      <div class="note">貼上你自己的 Google Maps 金鑰，探索結果就能直接顯示 Google 星等與評論。金鑰只存在這支手機的瀏覽器，不會被匯出或上傳。沒有金鑰也能用，評論會用連結帶你到各平台看。</div>
+      <label>API 金鑰</label><input id="gKey" type="password" placeholder="AIza…" autocomplete="off">
+      <div class="row" style="margin-top:8px"><button id="gKeySave">儲存</button><button class="ghost" id="gKeyClear">清除</button></div>
+      <details style="margin-top:10px"><summary class="note">怎麼取得金鑰？（需要 Google Cloud 帳單帳戶）</summary>
+        <ol class="note" style="padding-left:18px"><li>到 console.cloud.google.com 建立專案並綁定付款方式。</li><li>在「API 和服務」啟用 Places API (New)。</li><li>建立 API 金鑰；在限制裡選「網站」，填 https://yu-tinglu.github.io/* ，API 限制只選 Places API (New)。</li><li>把金鑰貼回這裡儲存。</li></ol>
+        <div class="note">Google 對這類查詢依用量計費（有每月免費額度，詳情請看 Google 的價格頁），建議在 Google Cloud 設定預算提醒。</div>
+      </details>
+    </div>
     <div class="card hidden" id="fbCard">
       <b>檔案內容（無法直接下載時請複製）</b>
       <textarea id="fbOut" readonly></textarea>
@@ -325,6 +351,7 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
   <div class="bar2"><button id="bkClose">← 返回</button><button id="bkDl2">下載小書</button></div>
   <div id="bookBody"></div>
 </div>
+<div id="gmSheet" class="hidden"><div class="gm-back" id="gmBack"></div><div class="gm-box"><div class="gm-head"><b id="gmT"></b><a id="gmOpen" class="lnk" target="_blank" rel="noopener" style="margin:0">↗ 用 Google 地圖開啟</a><button class="x" id="gmClose">✕</button></div><iframe id="gmFrame" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div></div>
 <input type="file" id="phFile" accept="image/*" class="hidden">
 <div id="toast" class="hidden"></div>
 
@@ -346,9 +373,9 @@ function ensureMap(id){
 const numIcon=(n,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color}">${n}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
 const EMO={'景點':'🏛','餐飲':'🍜','交通':'🚆','住宿':'🛏','購物':'🛍','其他':'📌'};
 const WD=['日','一','二','三','四','五','六'];
-let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
+let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
 function normalize(o){
-  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],intro:o.intro||null,origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
+  const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
   (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
   (o.pack||[]).forEach(p=>{if(p&&p.text)r.pack.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   return r;
@@ -405,30 +432,59 @@ function groupsFor(d){
   const mk=dd=>({color:COL[dd%COL.length],pts:dayStops(dd).filter(hasXY).map(s=>({lat:s.lat,lng:s.lng,name:s.name,q:mapQ(s)}))});
   return d==null?Array.from({length:numDays()},(_,i)=>mk(i)):[mk(d)];
 }
+let mapMode='google',gSrc='';
+const GDIR={transit:'r',walking:'w',driving:'d'};
+function gRef(s){return hasXY(s)?s.lat+','+s.lng:s.name+(S.trip.dest?' '+S.trip.dest:'')}
+function gEmbedDay(list){
+  const e=encodeURIComponent,hl='&output=embed&hl=zh-TW';
+  if(list.length>=2){
+    const rest=list.slice(1).map(s=>e(gRef(s))).join('+to:');
+    return `https://maps.google.com/maps?saddr=${e(gRef(list[0]))}&daddr=${rest}&dirflg=${GDIR[$('mode').value]||'r'}${hl}`;
+  }
+  if(list.length===1){const s=list[0];return `https://maps.google.com/maps?q=${e(s.name+(S.trip.dest?' '+S.trip.dest:''))}${hasXY(s)?`&ll=${s.lat},${s.lng}&z=15`:''}${hl}`}
+  return S.trip.dest?`https://maps.google.com/maps?q=${e(S.trip.dest)}${hl}`:'';
+}
 function renderMap(){
   const list=scope==='day'?dayStops(day):S.stops;
   const gs=groupsFor(scope==='day'?day:null),all=gs.flatMap(g=>g.pts);
-  const M=ensureMap('mapLeaf');
-  if(M){
-    $('mapLeaf').classList.remove('hidden');$('mapBox').innerHTML='';
-    M.layer.clearLayers();
-    gs.forEach(g=>{
-      if(g.pts.length>1)L.polyline(g.pts.map(p=>[p.lat,p.lng]),{color:g.color,weight:4,opacity:.8,dashArray:'8 8'}).addTo(M.layer);
-      g.pts.forEach((p,i)=>L.marker([p.lat,p.lng],{icon:numIcon(i+1,g.color)}).bindPopup(`<b>${esc(p.name)}</b><br><a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${p.q}">在 Google 地圖開啟</a>`).addTo(M.layer));
-    });
-    if(all.length)M.map.fitBounds(all.map(p=>[p.lat,p.lng]),{padding:[34,34],maxZoom:16});
-    else if(S.trip.dest)geocodeCached(S.trip.dest).then(c=>{if(c&&!all.length)M.map.setView([c.lat,c.lng],12)}).catch(()=>{});
-    setTimeout(()=>M.map.invalidateSize(),60);
+  const useG=mapMode==='google'&&scope==='day';
+  const gurl=useG?gEmbedDay(dayStops(day)):'';
+  const showG=useG&&!!gurl;
+  $('mapG').classList.toggle('hidden',!showG);
+  if(showG){
+    if(gSrc!==gurl){gSrc=gurl;$('mapG').src=gurl}
+    $('mapLeaf').classList.add('hidden');$('mapBox').innerHTML='';
   }else{
-    $('mapLeaf').classList.add('hidden');
-    const svg=buildMap(gs);
-    $('mapBox').innerHTML=svg||'<div class="empty">還沒有座標。從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。</div>';
+    const M=ensureMap('mapLeaf');
+    if(M){
+      $('mapLeaf').classList.remove('hidden');$('mapBox').innerHTML='';
+      M.layer.clearLayers();
+      gs.forEach(g=>{
+        if(g.pts.length>1)L.polyline(g.pts.map(p=>[p.lat,p.lng]),{color:g.color,weight:4,opacity:.8,dashArray:'8 8'}).addTo(M.layer);
+        g.pts.forEach((p,i)=>L.marker([p.lat,p.lng],{icon:numIcon(i+1,g.color)}).bindPopup(`<b>${esc(p.name)}</b><br><a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${p.q}">在 Google 地圖開啟</a>`).addTo(M.layer));
+      });
+      if(all.length)M.map.fitBounds(all.map(p=>[p.lat,p.lng]),{padding:[34,34],maxZoom:16});
+      else if(S.trip.dest)geocodeCached(S.trip.dest).then(c=>{if(c&&!all.length)M.map.setView([c.lat,c.lng],12)}).catch(()=>{});
+      setTimeout(()=>M.map.invalidateSize(),60);
+    }else{
+      $('mapLeaf').classList.add('hidden');
+      const svg=buildMap(gs);
+      $('mapBox').innerHTML=svg||'<div class="empty">還沒有座標。從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。</div>';
+    }
   }
+  $('mapGOpen').classList.toggle('hidden',!showG);if(showG)$('mapGOpen').href=gurl.replace('&output=embed','');
   const miss=list.filter(s=>!hasXY(s)).length;
   $('geoBtn').classList.toggle('hidden',!miss);
-  $('mapNote').textContent=(M?(all.length?'點圖釘看名稱，並可在 Google 地圖開啟。':'還沒有座標：從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。'):(all.length?'地圖圖磚載入失敗，改用示意圖（只標相對位置）。':''))+(miss?` ${miss} 個行程尚無座標。`:'');
+  let note;
+  if(showG)note='Google 地圖（內嵌）：依當天景點順序顯示路線，交通方式可在上方行程區切換；點「用 Google 地圖開啟」可直接導航。';
+  else if(mapMode==='google'&&scope==='all')note='Google 內嵌地圖一次只能顯示一天，「全程」改用 OpenStreetMap 顯示所有天數。';
+  else note=all.length?'點圖釘看名稱，並可在 Google 地圖開啟。':'還沒有座標：從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。';
+  $('mapNote').textContent=note+(miss?` ${miss} 個行程尚無座標。`:'');
   $('scDay').classList.toggle('on',scope==='day');$('scAll').classList.toggle('on',scope==='all');
+  $('mpGg').classList.toggle('on',mapMode==='google');$('mpOsm').classList.toggle('on',mapMode==='osm');
 }
+$('mpGg').onclick=()=>{mapMode='google';renderMap()};
+$('mpOsm').onclick=()=>{mapMode='osm';renderMap()};
 $('scDay').onclick=()=>{scope='day';renderMap()};
 $('scAll').onclick=()=>{scope='all';renderMap()};
 /* ---------- 外部資料（OpenStreetMap / 維基百科） ---------- */
@@ -544,7 +600,7 @@ function renderDays(){
       <div class="thumb" data-ph="${s.id}">${s.photo?`<img src="${s.photo}" alt="">`:EMO[s.cat]}</div>
       <div class="grow">
         <div><span class="time">${i+1}. ${s.time||''}</span></div>
-        <div><span class="tag">${esc(s.cat)}</span><b>${esc(s.name)}</b><a class="pin" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.cost?` <span class="note">· ${fmt(s.cost)}</span>`:''}</div>
+        <div><span class="tag">${esc(s.cat)}</span><b>${esc(s.name)}</b><a class="pin" data-gm="${esc(s.name)}" data-gmp="${esc(S.trip.dest||'')}" ${hasXY(s)?`data-lat="${s.lat}" data-lng="${s.lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.cost?` <span class="note">· ${fmt(s.cost)}</span>`:''}</div>
         ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
         ${s.desc?`<div class="note clamp">${esc(s.desc)}</div>`:''}
         ${s.photo?'':`<a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${mapQ(s)}">🔎 找參考照片</a>`}
@@ -595,7 +651,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 });
 
 /* ---------- 行程編輯 ---------- */
-$('mode').onchange=renderDays;
+$('mode').onchange=()=>{renderDays();renderMap()};
 $('dayChips').onclick=e=>{const d=e.target.dataset.d;if(d!=null){day=+d;if(!editId)$('sDay').value=String(day);renderDays();renderMap()}};
 function resetForm(){editId=null;['sTime','sName','sCost','sNote'].forEach(i=>$(i).value='');$('sCat').value='景點';$('sDay').value=String(day);
   $('sSave').textContent='加入行程';$('formTitle').textContent='新增景點／活動';$('sCancel').style.display='none'}
@@ -691,12 +747,44 @@ let exFilter='all';
 const TYPE={food:{l:'美食',e:'🍜',c:'#e2704f'},sight:{l:'景點',e:'🏛',c:'#0e5f6b'},culture:{l:'人文',e:'🎎',c:'#7a5c9e'}};
 const exMk={};
 const pinIcon=(emo,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color};font-size:15px">${emo}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+const REV={g:{l:'Google 評論'},ifoodie:{l:'愛食記',food:1,s:'ifoodie.tw'},dcard:{l:'Dcard',s:'dcard.tw'},ptt:{l:'PTT',s:'ptt.cc'},pixnet:{l:'痞客邦',s:'pixnet.net'},xhs:{l:'小紅書',kw:'小紅書'}};
+function revLinks(name,place,isFood,lat,lng){
+  const q=encodeURIComponent(name+' '+place);
+  return S.rev.filter(k=>REV[k]&&(!REV[k].food||isFood)).map(k=>{
+    const r=REV[k];
+    if(k==='g')return `<a class="lnk" data-gm="${esc(name)}" data-gmp="${esc(place)}" ${lat!=null?`data-lat="${lat}" data-lng="${lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${q}">⭐ Google 評論</a>`;
+    const u=r.s?`https://www.google.com/search?q=${q}%20site%3A${r.s}`:`https://www.google.com/search?q=${q}%20${encodeURIComponent(r.kw)}`;
+    return `<a class="lnk" target="_blank" rel="noopener" href="${u}">${r.l}</a>`;
+  }).join('');
+}
+const getKey=()=>{try{return localStorage.getItem('trip-gkey')||''}catch(e){return ''}};
+async function gRating(name,place,lat,lng){
+  const key=getKey();if(!key)throw new Error('nokey');
+  const body={textQuery:name+' '+place,languageCode:'zh-TW',maxResultCount:1};
+  if(lat!=null&&lng!=null)body.locationBias={circle:{center:{latitude:+lat,longitude:+lng},radius:800}};
+  const r=await fetch('https://places.googleapis.com/v1/places:searchText',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':key,'X-Goog-FieldMask':'places.displayName,places.rating,places.userRatingCount,places.googleMapsUri,places.reviews,places.priceLevel'},body:JSON.stringify(body)});
+  if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;throw e}
+  return ((await r.json()).places||[])[0]||null;
+}
+const PRICE={PRICE_LEVEL_FREE:'免費',PRICE_LEVEL_INEXPENSIVE:'$ 平價',PRICE_LEVEL_MODERATE:'$$ 中等',PRICE_LEVEL_EXPENSIVE:'$$$ 偏貴',PRICE_LEVEL_VERY_EXPENSIVE:'$$$$ 高價'};
+function ratingHTML(p){
+  if(!p||p.rating==null)return '<div class="note">Google 上找不到這個地點的評分。</div>';
+  const rv=(p.reviews||[]).slice(0,3).map(x=>`<div class="rv"><div class="note">${esc((x.authorAttribution&&x.authorAttribution.displayName)||'')}　${'★'.repeat(Math.round(x.rating||0))}　${esc(x.relativePublishTimeDescription||'')}</div><div class="clamp3">${esc((x.text&&x.text.text)||'')}</div></div>`).join('');
+  return `<div><b>⭐ ${p.rating}</b> <span class="note">（${fmt(p.userRatingCount||0)} 則 Google 評論）${PRICE[p.priceLevel]?'｜'+PRICE[p.priceLevel]:''}</span></div>${rv}<div class="note">資料來源：Google 地圖${okUrl(p.googleMapsUri)?` <a class="lnk" target="_blank" rel="noopener" href="${esc(p.googleMapsUri)}">看全部評論</a>`:''}</div>`;
+}
+async function showRating(el,name,place,lat,lng){
+  el.innerHTML='<div class="note">查詢 Google 評分中…</div>';
+  try{el.innerHTML=ratingHTML(await gRating(name,place,lat,lng))}
+  catch(e){el.innerHTML=`<div class="note">${e.status===400||e.status===403?'Google 金鑰無效、未啟用 Places API (New)，或網址限制不符（需允許 yu-tinglu.github.io）。':'查詢失敗，請稍後再試。'}</div>`}
+}
 function xcardHTML(v,i){
   const T=TYPE[v.type];
   return `<div class="xcard" id="x${i}"><div class="xph${v.img?'':' noimg'}" style="background:linear-gradient(135deg,${T.c},${T.c}99)"><div class="xemo">${T.e}</div>${v.img?`<img src="${esc(v.img)}" loading="lazy" alt="" onerror="this.parentNode.classList.add('noimg');this.remove()">`:''}<span class="xbadge">${T.l}</span></div>
   <div class="xbody"><div class="xt">${esc(v.name)}${v.cost?` <span class="note">· 約 ${fmt(v.cost)}</span>`:''}</div><div class="xd">${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}
-  <div class="xact"><button data-add="${i}" ${ex.added[i]?'disabled':''}>${ex.added[i]?'已加入 ✓':'＋ 加入行程'}</button>${v.lat!=null?`<button class="ghost" data-loc="${i}">📍 在地圖看</button>`:''}${v.type==='food'?`<button class="ghost" data-shop="${i}">🏪 查店家</button>`:''}</div>
-  <div style="margin-top:8px">${okUrl(v.url)?`<a class="lnk" target="_blank" rel="noopener" href="${esc(v.url)}">🌐 ${v.type==='food'?'官網':'維基百科'}</a>`:''}<a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+ex.place)}">Google 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+ex.place)}">🔎 更多照片</a></div></div></div>`;
+  <div class="xact"><button data-add="${i}" ${ex.added[i]?'disabled':''}>${ex.added[i]?'已加入 ✓':'＋ 加入行程'}</button>${v.lat!=null?`<button class="ghost" data-loc="${i}">📍 在地圖看</button>`:''}${v.type==='food'?`<button class="ghost" data-shop="${i}">🏪 查店家</button>`:''}${getKey()?`<button class="ghost" data-grate="${i}">⭐ Google 評分</button>`:''}</div>
+  <div class="grev" id="gr${i}"></div>
+  <div class="revrow"><span class="note">💬 評論：</span>${revLinks(v.name,ex.place,v.type==='food',v.lat,v.lng)}</div>
+  <div style="margin-top:4px">${okUrl(v.url)?`<a class="lnk" target="_blank" rel="noopener" href="${esc(v.url)}">🌐 ${v.type==='food'?'官網':'維基百科'}</a>`:''}<a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+ex.place)}">🔎 更多照片</a></div></div></div>`;
 }
 function renderExplore(){
   if(!ex.items.length){$('eRes').classList.add('hidden');return}
@@ -770,8 +858,10 @@ function renderShops(){
   $('shIntro').innerHTML=(sh.img?`<img src="${esc(sh.img)}" alt="" onerror="this.remove()" style="width:100%;max-height:170px;object-fit:cover;border-radius:12px;margin-bottom:6px">`:'')+esc(sh.intro||'')+(okUrl(sh.wiki)?` <a class="lnk" target="_blank" rel="noopener" href="${esc(sh.wiki)}">📖 維基百科</a>`:'');
   $('shList').innerHTML=sh.items.map((v,i)=>`<div class="ex" id="sx${i}"><div style="display:flex;gap:10px"><div class="pinn" style="background:var(--warm);flex:none">${i+1}</div><div class="grow"><b>${esc(v.name)}</b>${v.price?` <span class="note">· 約 ${fmt(v.price)}</span>`:''}
     ${v.area?`<div class="note">📌 ${esc(v.area)}</div>`:''}<div>${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}${urlTag(v)}
-    <div class="xact"><button data-sadd="${i}" ${sh.added[i]?'disabled':''}>${sh.added[i]?'已加入 ✓':'＋ 加入行程'}</button><button class="ghost" data-sloc="${i}">📍 在地圖看</button></div>
-    <div style="margin-top:6px"><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+sh.place)}">Google 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+sh.place)}">🔎 照片</a></div></div></div></div>`).join('')
+    <div class="xact"><button data-sadd="${i}" ${sh.added[i]?'disabled':''}>${sh.added[i]?'已加入 ✓':'＋ 加入行程'}</button><button class="ghost" data-sloc="${i}">📍 在地圖看</button>${getKey()?`<button class="ghost" data-sgr="${i}">⭐ Google 評分</button>`:''}</div>
+    <div class="grev" id="sgr${i}"></div>
+    <div class="revrow"><span class="note">💬 評論：</span>${revLinks(v.name,sh.place,true,v.lat,v.lng)}</div>
+    <div style="margin-top:4px"><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+sh.place)}">🔎 照片</a></div></div></div></div>`).join('')
     +(sh.items.length?'<div class="note" style="margin-top:8px">店家資料來自 OpenStreetMap（依距離排序），可能不完整或已歇業，出發前請用地圖確認。</div>':'');
   const M=ensureMap('shMap');
   $('shMap').classList.toggle('hidden',!M||!sh.items.length);
@@ -786,6 +876,7 @@ $('eShopBtn').onclick=()=>askShops($('eKw').value);
 $('eKw').addEventListener('keydown',e=>{if(e.key==='Enter')$('eShopBtn').click()});
 $('shList').onclick=e=>{
   const t=e.target;
+  if(t.dataset.sgr!=null){const i=+t.dataset.sgr,v=sh.items[i];showRating($('sgr'+i),v.name,sh.place,v.lat,v.lng);return}
   if(t.dataset.sloc!=null){const v=sh.items[+t.dataset.sloc],M=maps['shMap'];if(M){$('shMap').scrollIntoView({behavior:'smooth',block:'center'});M.map.setView([v.lat,v.lng],17)}return}
   const i=t.dataset.sadd;if(i==null)return;
   const v=sh.items[+i],d=+$('shDay').value;
@@ -796,6 +887,7 @@ $('shList').onclick=e=>{
 };
 $('eList').onclick=e=>{
   const t=e.target;
+  if(t.dataset.grate!=null){const i=+t.dataset.grate,v=ex.items[i];showRating($('gr'+i),v.name,ex.place,v.lat,v.lng);return}
   if(t.dataset.shop!=null){const it=ex.items[+t.dataset.shop];$('eKw').value=it.name;askShops(it.name);return}
   if(t.dataset.loc!=null){const i=+t.dataset.loc,v=ex.items[i],M=maps['eMap'];
     if(M&&exMk[i]){$('eMapWrap').scrollIntoView({behavior:'smooth',block:'center'});M.map.setView([v.lat,v.lng],16);exMk[i].openTooltip()}else toast('地圖尚未載入');return}
@@ -849,7 +941,7 @@ $('imCancel').onclick=()=>{pending=null;$('imPending').classList.add('hidden')};
 $('imApply').onclick=()=>{
   if(!pending)return;
   S=pending;pending=null;day=0;editId=null;ex={place:'',summary:'',items:[],added:{}};
-  save();syncTripInputs();$('fOrigin').value=S.origin;$('fPax').value=String(S.pax);['lvA','lvF'].forEach(x=>$(x).value=S.level);$('auS').value=S.auto.start;$('auE').value=S.auto.end;$('auPace').value=String(S.auto.pace);renderExplore();renderAll();resetForm();loadWeather();
+  save();syncTripInputs();$('fOrigin').value=S.origin;$('fPax').value=String(S.pax);['lvA','lvF'].forEach(x=>$(x).value=S.level);$('auS').value=S.auto.start;$('auE').value=S.auto.end;$('auPace').value=String(S.auto.pace);renderRevChips();renderExplore();renderAll();resetForm();loadWeather();
   $('imPending').classList.add('hidden');$('imText').value='';toast('匯入完成');
 };
 $('exp').onclick=()=>{
@@ -1058,6 +1150,36 @@ function applyDraft(replace){
 $('auAdd').onclick=()=>applyDraft(false);
 $('auReplace').onclick=()=>applyDraft(true);
 $('auS').value=S.auto.start;$('auE').value=S.auto.end;$('auPace').value=String(S.auto.pace);
+
+/* ---------- Google 地圖：內嵌地點卡 ---------- */
+function openGm(name,place,lat,lng,href){
+  const e=encodeURIComponent,q=name+(place?' '+place:'');
+  $('gmT').textContent=name;
+  $('gmOpen').href=href||('https://www.google.com/maps/search/?api=1&query='+e(q));
+  $('gmFrame').src=`https://maps.google.com/maps?q=${e(q)}${lat&&lng?`&ll=${lat},${lng}&z=16`:''}&output=embed&hl=zh-TW`;
+  $('gmSheet').classList.remove('hidden');document.body.style.overflow='hidden';
+}
+function closeGm(){$('gmSheet').classList.add('hidden');$('gmFrame').src='about:blank';document.body.style.overflow=''}
+$('gmClose').onclick=closeGm;$('gmBack').onclick=closeGm;
+document.addEventListener('click',ev=>{
+  const a=ev.target.closest('[data-gm]');if(!a)return;
+  if(ev.metaKey||ev.ctrlKey||ev.shiftKey)return;
+  ev.preventDefault();openGm(a.dataset.gm,a.dataset.gmp,a.dataset.lat,a.dataset.lng,a.href);
+});
+/* ---------- 評論來源選擇 ---------- */
+function renderRevChips(){
+  $('eRev').innerHTML=Object.entries(REV).map(([k,r])=>`<button class="chip ${S.rev.includes(k)?'on':''}" data-r="${k}">${r.l}</button>`).join('');
+}
+$('eRev').onclick=e=>{
+  const b=e.target.closest('[data-r]');if(!b)return;
+  const k=b.dataset.r;S.rev=S.rev.includes(k)?S.rev.filter(x=>x!==k):[...S.rev,k];
+  save();renderRevChips();if(ex.items.length)renderExplore();if(sh.items.length)renderShops();
+};
+/* ---------- Google 金鑰（只存在本機） ---------- */
+$('gKey').value=getKey();
+$('gKeySave').onclick=()=>{try{localStorage.setItem('trip-gkey',$('gKey').value.trim());toast($('gKey').value.trim()?'金鑰已儲存，重新搜尋後會出現「Google 評分」按鈕':'已清除')}catch(e){toast('無法儲存')};if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
+$('gKeyClear').onclick=()=>{try{localStorage.removeItem('trip-gkey')}catch(e){}$('gKey').value='';toast('已清除金鑰');if(ex.items.length)renderExplore();if(sh.items.length)renderShops()};
+renderRevChips();
 
 $('heroArt').innerHTML=SCENE;
 resetForm();
