@@ -8,6 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="旅遊規劃">
 <title>旅遊規劃小幫手</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
@@ -87,6 +89,25 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
 .ex b{font-family:var(--serif)}
 .ex h4{margin:14px 0 0;font:700 15px var(--serif);color:var(--warm)}
 #toast{position:fixed;left:50%;bottom:108px;transform:translateX(-50%);background:#1f3a38;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;z-index:100;max-width:90%;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.leaf{height:300px;border-radius:14px;overflow:hidden;margin-top:8px;isolation:isolate;background:#e9e1cf}
+.leaflet-container{font-family:var(--sans)}
+.pinn{width:28px;height:28px;border-radius:50%;color:#fff;font:700 13px/24px var(--sans);text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.xcard{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin:14px 0;box-shadow:0 1px 2px rgba(80,60,20,.05),0 10px 24px rgba(80,60,20,.08);transition:box-shadow .3s}
+.xcard.hl{box-shadow:0 0 0 3px var(--warm)}
+.xph.noimg{aspect-ratio:3/1}
+.xph{position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.xph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.xemo{font-size:56px;opacity:.92}.xph.noimg .xemo{font-size:40px}
+.xbadge{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;padding:2px 10px;border-radius:99px;font-weight:700}
+.xbody{padding:14px 16px 16px}
+.xt{font:700 18px var(--serif)}
+.xd{margin:6px 0;font-size:14px}
+.xact{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.xact button{padding:7px 12px;font-size:13px;border-radius:12px}
+.place{display:flex;gap:12px;align-items:center}
+.pimg{flex:none;width:72px;height:72px;border-radius:16px;overflow:hidden;background:var(--acc2)}
+.pimg:empty{display:none}.pimg img{width:100%;height:100%;object-fit:cover;display:block}
+.ptitle{font:700 20px var(--serif);color:var(--acc)}
 #book{position:fixed;inset:0;background:#e9e1cf;z-index:50;overflow:auto}
 #book .bar2{position:sticky;top:0;display:flex;gap:8px;padding:8px 12px;background:#0e5f6b;z-index:2}
 #book .bar2 button{background:#fff;color:#0e5f6b}
@@ -148,6 +169,7 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
         <b>🗺 路線示意圖</b>
         <div class="row" style="flex:none;gap:6px"><button class="chip on" id="scDay">當天</button><button class="chip" id="scAll">全程</button></div>
       </div>
+      <div id="mapLeaf" class="leaf"></div>
       <div id="mapBox" style="margin-top:8px"></div>
       <div class="note" id="mapNote" style="margin-top:6px"></div>
       <button class="ghost hidden" id="geoBtn" style="margin-top:8px">補齊座標（OpenStreetMap）</button>
@@ -176,31 +198,37 @@ a.lnk{color:var(--acc);font-size:13px;text-decoration:none;margin-right:10px;fon
   <!-- 探索 -->
   <section id="tab-explore" class="hidden">
     <div class="card">
-      <b>🧭 推薦探索</b>
-      <label>想去哪裡？</label><input id="eDest" placeholder="輸入城市或地區，留空則用旅程目的地">
-      <label>想看哪些推薦（可複選）</label>
-      <div class="chips" id="eTypes">
+      <b>🧭 探索目的地</b>
+      <div class="note">輸入想去的城市，看看當地的美食、景點和人文特色。</div>
+      <label>想去哪裡？</label><input id="eDest" placeholder="例如：京都、台南、曼谷（留空則用旅程目的地）">
+      <div class="chips" id="eTypes" style="margin-top:8px">
         <button class="chip on" data-t="food">🍜 美食</button>
         <button class="chip on" data-t="sight">🏛 景點</button>
         <button class="chip on" data-t="culture">🎎 人文特色</button>
       </div>
-      <button id="eGo" style="margin-top:10px;width:100%">搜尋推薦</button>
+      <button id="eGo" style="margin-top:6px;width:100%">搜尋推薦</button>
       <div class="note" id="eMsg" style="margin-top:6px"></div>
-      <label style="margin-top:14px">想深入查某項特色？（例如：貢丸、牛肉麵、夜市）</label>
-      <div class="row"><input id="eKw" placeholder="輸入特色名稱"><button class="ghost" id="eShopBtn" style="flex:none">查店家</button></div>
+    </div>
+    <div class="card">
+      <b>🏪 想深入查某項特色？</b>
+      <div class="note">例如：貢丸、牛肉麵、夜市，會列出當地的相關店家並標在地圖上。</div>
+      <div class="row" style="margin-top:6px"><input id="eKw" placeholder="輸入特色名稱"><button class="ghost" id="eShopBtn" style="flex:none">查店家</button></div>
     </div>
     <div class="card hidden" id="shopCard">
       <b id="shTitle"></b>
       <div class="note" id="shMsg" style="margin:6px 0"></div>
-      <div class="row"><div style="flex:1.2"><label>加入到哪一天</label><select id="shDay"></select></div></div>
       <div id="shIntro" class="note" style="margin:8px 0"></div>
+      <div id="shMap" class="leaf hidden" style="height:240px"></div>
+      <div class="row" style="align-items:center;margin-top:10px"><label style="margin:0;flex:none">加入到</label><select id="shDay"></select></div>
       <div id="shList"></div>
     </div>
-    <div class="card hidden" id="eRes">
-      <div class="row"><div style="flex:1.2"><label>加入到哪一天</label><select id="eDay"></select></div></div>
-      <div id="eSummary" class="note" style="margin:8px 0"></div>
+    <div id="eRes" class="hidden">
+      <div class="card place"><div id="ePlaceImg" class="pimg"></div><div><div class="ptitle" id="ePlaceT"></div><div class="note" id="ePlaceS"></div></div></div>
+      <div id="eMapWrap" class="card" style="padding:8px"><div id="eMap" class="leaf" style="margin:0"></div></div>
+      <div class="chips" id="eFilter"></div>
+      <div class="card" style="padding:10px 14px"><div class="row" style="align-items:center"><label style="margin:0;flex:none">加入到</label><select id="eDay"></select></div></div>
       <div id="eList"></div>
-      <div class="note" style="margin-top:8px">資料來源：OpenStreetMap 貢獻者與維基百科（皆為社群維護，沒有評分與即時營業資訊，出發前請再確認）。美食依資料完整度排序，景點與人文特色來自維基百科條目。</div>
+      <div class="note" style="margin:8px 4px">資料來源：OpenStreetMap 貢獻者與維基百科、維基共享資源（社群維護，沒有評分與即時營業資訊，出發前請再確認）。景點照片若來自座標附近的維基共享資源，僅供參考。</div>
     </div>
   </section>
 
@@ -305,6 +333,17 @@ const $=id=>document.getElementById(id);
 const KEY='trip-planner-v2';
 const COL=['#0e5f6b','#e2704f','#7a5c9e','#2a9d8f','#c9852b','#b04a6a','#5a7d2a'];
 const SCENE=`<svg viewBox="0 0 400 220" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b4a54"/><stop offset=".55" stop-color="#1f8a86"/><stop offset="1" stop-color="#f3b27a"/></linearGradient></defs><rect width="400" height="220" fill="url(#sky)"/><circle cx="318" cy="150" r="58" fill="#f6d28a" opacity=".22"/><circle cx="318" cy="150" r="36" fill="#f7c76a"/><ellipse cx="90" cy="46" rx="34" ry="9" fill="#fff" opacity=".16"/><ellipse cx="120" cy="38" rx="24" ry="7" fill="#fff" opacity=".16"/><ellipse cx="260" cy="70" rx="30" ry="8" fill="#fff" opacity=".14"/><path d="M-10 170 L70 105 L120 150 L175 95 L250 165 L300 130 L410 185 L410 230 L-10 230Z" fill="#0f6a68" opacity=".85"/><path d="M-10 195 L60 150 L130 190 L210 140 L290 195 L350 165 L410 200 L410 230 L-10 230Z" fill="#0b4a54"/><path d="M-10 212 Q50 200 100 212 T200 212 T300 212 T410 212 L410 230 L-10 230Z" fill="#073a42"/><path d="M236 104 Q300 28 372 46" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 5" opacity=".7"/><text x="366" y="50" font-size="20" fill="#fff" font-family="sans-serif" transform="rotate(-8 372 46)">✈</text></svg>`;
+const maps={};
+function ensureMap(id){
+  if(!window.L)return null;
+  if(!maps[id]){
+    const m=L.map(id,{scrollWheelZoom:false}).setView([25.03,121.56],11);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(m);
+    maps[id]={map:m,layer:L.layerGroup().addTo(m)};
+  }
+  return maps[id];
+}
+const numIcon=(n,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color}">${n}</div>`,iconSize:[28,28],iconAnchor:[14,14]});
 const EMO={'景點':'🏛','餐飲':'🍜','交通':'🚆','住宿':'🛏','購物':'🛍','其他':'📌'};
 const WD=['日','一','二','三','四','五','六'];
 let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3}};
@@ -368,11 +407,26 @@ function groupsFor(d){
 }
 function renderMap(){
   const list=scope==='day'?dayStops(day):S.stops;
-  const svg=buildMap(groupsFor(scope==='day'?day:null));
-  $('mapBox').innerHTML=svg||'<div class="empty">還沒有座標。從「探索」加入景點會自動帶座標，或按下方「補齊座標」。</div>';
+  const gs=groupsFor(scope==='day'?day:null),all=gs.flatMap(g=>g.pts);
+  const M=ensureMap('mapLeaf');
+  if(M){
+    $('mapLeaf').classList.remove('hidden');$('mapBox').innerHTML='';
+    M.layer.clearLayers();
+    gs.forEach(g=>{
+      if(g.pts.length>1)L.polyline(g.pts.map(p=>[p.lat,p.lng]),{color:g.color,weight:4,opacity:.8,dashArray:'8 8'}).addTo(M.layer);
+      g.pts.forEach((p,i)=>L.marker([p.lat,p.lng],{icon:numIcon(i+1,g.color)}).bindPopup(`<b>${esc(p.name)}</b><br><a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${p.q}">在 Google 地圖開啟</a>`).addTo(M.layer));
+    });
+    if(all.length)M.map.fitBounds(all.map(p=>[p.lat,p.lng]),{padding:[34,34],maxZoom:16});
+    else if(S.trip.dest)geocodeCached(S.trip.dest).then(c=>{if(c&&!all.length)M.map.setView([c.lat,c.lng],12)}).catch(()=>{});
+    setTimeout(()=>M.map.invalidateSize(),60);
+  }else{
+    $('mapLeaf').classList.add('hidden');
+    const svg=buildMap(gs);
+    $('mapBox').innerHTML=svg||'<div class="empty">還沒有座標。從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。</div>';
+  }
   const miss=list.filter(s=>!hasXY(s)).length;
   $('geoBtn').classList.toggle('hidden',!miss);
-  $('mapNote').textContent=(svg?'示意圖：只標出相對位置與順序，沒有街道底圖，點圖釘可在 Google 地圖開啟。':'')+(miss?` ${miss} 個行程尚無座標。`:'')+(svg&&list.some(hasXY)?'':'');
+  $('mapNote').textContent=(M?(all.length?'點圖釘看名稱，並可在 Google 地圖開啟。':'還沒有座標：從「探索」或「排程」加入的景點會自動帶座標，或按下方「補齊座標」。'):(all.length?'地圖圖磚載入失敗，改用示意圖（只標相對位置）。':''))+(miss?` ${miss} 個行程尚無座標。`:'');
   $('scDay').classList.toggle('on',scope==='day');$('scAll').classList.toggle('on',scope==='all');
 }
 $('scDay').onclick=()=>{scope='day';renderMap()};
@@ -426,7 +480,12 @@ async function fetchCulture(place){
   return pagesOf(j).sort((a,b)=>(a.index||0)-(b.index||0)).slice(0,6).map(p=>({type:'culture',name:p.title,desc:clip(p.extract,170)||'（維基百科條目）',tip:'',cost:0,lat:null,lng:null,img:p.thumbnail?p.thumbnail.source:'',url:wpUrl(p.title)}));
 }
 async function fetchPlaceSummary(place){
-  try{const j=await jget('https://zh.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(place));return j.type==='standard'?clip(j.extract,140):''}catch(e){return ''}
+  try{const j=await jget('https://zh.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(place));return j.type==='standard'?{text:clip(j.extract,140),img:j.thumbnail?j.thumbnail.source:''}:{text:'',img:''}}catch(e){return {text:'',img:''}}
+}
+async function commonsPhoto(lat,lng){
+  const j=await jget(`https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=geosearch&ggsnamespace=6&ggscoord=${lat}|${lng}&ggsradius=150&ggslimit=6&prop=imageinfo&iiprop=url|mime&iiurlwidth=640`);
+  const p=pagesOf(j).map(x=>x.imageinfo&&x.imageinfo[0]).filter(i=>i&&/^image\/(jpeg|png)$/.test(i.mime));
+  return p.length?(p[0].thumburl||p[0].url):'';
 }
 async function fetchIntro(kw,place){
   try{
@@ -532,6 +591,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
   TABS.forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.t));
   window.scrollTo(0,0);
+  setTimeout(()=>Object.values(maps).forEach(m=>m.map.invalidateSize()),80);
 });
 
 /* ---------- 行程編輯 ---------- */
@@ -618,30 +678,65 @@ $('eGo').onclick=async()=>{
       types.includes('culture')?fetchCulture(place):Promise.resolve([]),
       fetchPlaceSummary(place)]);
     const arr=i=>res[i].status==='fulfilled'?res[i].value:[];
-    const items=[...arr(0),...arr(1),...arr(2)],summary=res[3].status==='fulfilled'?res[3].value:'';
+    const items=[...arr(0),...arr(1),...arr(2)],ps=res[3].status==='fulfilled'?res[3].value:{text:'',img:''},summary=ps.text;
     if(!items.length){$('eMsg').textContent=res.slice(0,3).some(r=>r.status==='rejected')?'資料來源暫時連不上或請求太頻繁，請稍後再試。':'這個地點附近沒有找到資料，換大一點的地名試試。';return}
-    ex={place,summary,items,added:{},center:c};
+    ex={place,summary,items,added:{},center:c,placeImg:ps.img};exFilter='all';
     if(summary){S.intro={place,text:summary};save()}
     $('eMsg').textContent=res.slice(0,3).some(r=>r.status==='rejected')?'部分類別暫時抓不到，其餘已顯示。':'';
     renderExplore();
   }catch(err){$('eMsg').textContent=netMsg(err)}
   finally{$('eGo').disabled=false}
 };
+let exFilter='all';
+const TYPE={food:{l:'美食',e:'🍜',c:'#e2704f'},sight:{l:'景點',e:'🏛',c:'#0e5f6b'},culture:{l:'人文',e:'🎎',c:'#7a5c9e'}};
+const exMk={};
+const pinIcon=(emo,color)=>L.divIcon({className:'',html:`<div class="pinn" style="background:${color};font-size:15px">${emo}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+function xcardHTML(v,i){
+  const T=TYPE[v.type];
+  return `<div class="xcard" id="x${i}"><div class="xph${v.img?'':' noimg'}" style="background:linear-gradient(135deg,${T.c},${T.c}99)"><div class="xemo">${T.e}</div>${v.img?`<img src="${esc(v.img)}" loading="lazy" alt="" onerror="this.parentNode.classList.add('noimg');this.remove()">`:''}<span class="xbadge">${T.l}</span></div>
+  <div class="xbody"><div class="xt">${esc(v.name)}${v.cost?` <span class="note">· 約 ${fmt(v.cost)}</span>`:''}</div><div class="xd">${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}
+  <div class="xact"><button data-add="${i}" ${ex.added[i]?'disabled':''}>${ex.added[i]?'已加入 ✓':'＋ 加入行程'}</button>${v.lat!=null?`<button class="ghost" data-loc="${i}">📍 在地圖看</button>`:''}${v.type==='food'?`<button class="ghost" data-shop="${i}">🏪 查店家</button>`:''}</div>
+  <div style="margin-top:8px">${okUrl(v.url)?`<a class="lnk" target="_blank" rel="noopener" href="${esc(v.url)}">🌐 ${v.type==='food'?'官網':'維基百科'}</a>`:''}<a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+ex.place)}">Google 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+ex.place)}">🔎 更多照片</a></div></div></div>`;
+}
 function renderExplore(){
   if(!ex.items.length){$('eRes').classList.add('hidden');return}
   $('eRes').classList.remove('hidden');
-  $('eSummary').textContent=ex.place+(ex.summary?'：'+ex.summary:'');
-  const T=[['food','🍜 美食'],['sight','🏛 景點'],['culture','🎎 人文特色']];
-  $('eList').innerHTML=T.map(([k,l])=>{
-    const it=ex.items.map((v,i)=>[v,i]).filter(([v])=>v.type===k);
-    if(!it.length)return '';
-    return `<h4>${l}</h4>`+it.map(([v,i])=>`<div class="ex"><b>${esc(v.name)}</b>${v.cost?` <span class="note">· 約 ${fmt(v.cost)}</span>`:''}
-      ${imgTag(v)}<div>${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}${urlTag(v)}
-      <div style="margin-top:6px"><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+ex.place)}">📍 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+ex.place)}">🔎 照片</a>
-      <button class="ghost" data-add="${i}" ${ex.added[i]?'disabled':''} style="padding:5px 12px">${ex.added[i]?'已加入 ✓':'＋ 加入行程'}</button>
-      ${v.type==='food'?`<button class="ghost" data-shop="${i}" style="padding:5px 12px">🏪 查店家</button>`:''}</div></div>`).join('');
-  }).join('');
+  $('ePlaceT').textContent=ex.place;$('ePlaceS').textContent=ex.summary||'';
+  $('ePlaceImg').innerHTML=ex.placeImg?`<img src="${esc(ex.placeImg)}" alt="" onerror="this.remove()">`:'';
+  const cnt={all:ex.items.length};['food','sight','culture'].forEach(t=>cnt[t]=ex.items.filter(v=>v.type===t).length);
+  $('eFilter').innerHTML=[['all','全部'],['food','🍜 美食'],['sight','🏛 景點'],['culture','🎎 人文']].filter(([k])=>k==='all'||cnt[k]).map(([k,l])=>`<button class="chip ${exFilter===k?'on':''}" data-f="${k}">${l} ${cnt[k]}</button>`).join('');
+  const vis=ex.items.map((v,i)=>[v,i]).filter(([v])=>exFilter==='all'||v.type===exFilter);
+  $('eList').innerHTML=vis.map(([v,i])=>xcardHTML(v,i)).join('');
+  const M=ensureMap('eMap');
+  $('eMapWrap').classList.toggle('hidden',!M);
+  if(M){
+    M.layer.clearLayers();Object.keys(exMk).forEach(k=>delete exMk[k]);
+    const pts=[];
+    vis.forEach(([v,i])=>{if(v.lat==null||v.lng==null)return;
+      exMk[i]=L.marker([v.lat,v.lng],{icon:pinIcon(TYPE[v.type].e,TYPE[v.type].c)}).bindTooltip(v.name).on('click',()=>focusCard(i)).addTo(M.layer);pts.push([v.lat,v.lng])});
+    if(pts.length)M.map.fitBounds(pts,{padding:[30,30],maxZoom:15});else if(ex.center)M.map.setView([ex.center.lat,ex.center.lng],13);
+    setTimeout(()=>M.map.invalidateSize(),60);
+  }
+  fillCommons();
 }
+function focusCard(i){const el=$('x'+i);if(!el)return;el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),1800)}
+let commonsRun=0;
+async function fillCommons(){
+  const run=++commonsRun;
+  for(let i=0;i<ex.items.length;i++){
+    const v=ex.items[i];
+    if(run!==commonsRun)return;
+    if(v.img||v.type==='food'||v.lat==null||v.tried)continue;
+    v.tried=true;
+    try{
+      const u=await commonsPhoto(v.lat,v.lng);
+      if(u){v.img=u;const ph=document.querySelector('#x'+i+' .xph');
+        if(ph&&!ph.querySelector('img')){const im=document.createElement('img');im.src=u;im.loading='lazy';im.alt='';im.onerror=()=>{ph.classList.add('noimg');im.remove()};ph.classList.remove('noimg');ph.insertBefore(im,ph.querySelector('.xbadge'))}}
+    }catch(e){}
+  }
+}
+$('eFilter').onclick=e=>{const f=e.target.closest('[data-f]');if(f){exFilter=f.dataset.f;renderExplore()}};
+
 /* 深入查店家 */
 let sh={place:'',kw:'',intro:'',items:[],added:{}};
 async function askShops(kw){
@@ -672,17 +767,27 @@ async function askShops(kw){
   finally{$('eShopBtn').disabled=false}
 }
 function renderShops(){
-  $('shIntro').innerHTML=(sh.img?`<img src="${esc(sh.img)}" alt="" style="width:100%;max-height:170px;object-fit:cover;border-radius:12px;margin-bottom:6px">`:'')+esc(sh.intro||'')+(okUrl(sh.wiki)?` <a class="lnk" target="_blank" rel="noopener" href="${esc(sh.wiki)}">📖 維基百科</a>`:'');
-  $('shList').innerHTML=sh.items.map((v,i)=>`<div class="ex"><b>${esc(v.name)}</b>${v.price?` <span class="note">· 約 ${fmt(v.price)}</span>`:''}
-    ${v.area?`<div class="note">📌 ${esc(v.area)}</div>`:''}${imgTag(v)}<div>${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}${urlTag(v)}
-    <div style="margin-top:6px"><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+sh.place)}">📍 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+sh.place)}">🔎 照片</a>
-    <button class="ghost" data-sadd="${i}" ${sh.added[i]?'disabled':''} style="padding:5px 12px">${sh.added[i]?'已加入 ✓':'＋ 加入行程'}</button></div></div>`).join('')
-    +'<div class="note" style="margin-top:8px">店家資料來自 OpenStreetMap（依距離排序），可能不完整或已歇業，出發前請用地圖確認。</div>';
+  $('shIntro').innerHTML=(sh.img?`<img src="${esc(sh.img)}" alt="" onerror="this.remove()" style="width:100%;max-height:170px;object-fit:cover;border-radius:12px;margin-bottom:6px">`:'')+esc(sh.intro||'')+(okUrl(sh.wiki)?` <a class="lnk" target="_blank" rel="noopener" href="${esc(sh.wiki)}">📖 維基百科</a>`:'');
+  $('shList').innerHTML=sh.items.map((v,i)=>`<div class="ex" id="sx${i}"><div style="display:flex;gap:10px"><div class="pinn" style="background:var(--warm);flex:none">${i+1}</div><div class="grow"><b>${esc(v.name)}</b>${v.price?` <span class="note">· 約 ${fmt(v.price)}</span>`:''}
+    ${v.area?`<div class="note">📌 ${esc(v.area)}</div>`:''}<div>${esc(v.desc||'')}</div>${v.tip?`<div class="note">💡 ${esc(v.tip)}</div>`:''}${urlTag(v)}
+    <div class="xact"><button data-sadd="${i}" ${sh.added[i]?'disabled':''}>${sh.added[i]?'已加入 ✓':'＋ 加入行程'}</button><button class="ghost" data-sloc="${i}">📍 在地圖看</button></div>
+    <div style="margin-top:6px"><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(v.name+' '+sh.place)}">Google 地圖</a><a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(v.name+' '+sh.place)}">🔎 照片</a></div></div></div></div>`).join('')
+    +(sh.items.length?'<div class="note" style="margin-top:8px">店家資料來自 OpenStreetMap（依距離排序），可能不完整或已歇業，出發前請用地圖確認。</div>':'');
+  const M=ensureMap('shMap');
+  $('shMap').classList.toggle('hidden',!M||!sh.items.length);
+  if(M&&sh.items.length){
+    M.layer.clearLayers();
+    sh.items.forEach((v,i)=>L.marker([v.lat,v.lng],{icon:numIcon(i+1,'#e2704f')}).bindTooltip(v.name).on('click',()=>{const el=$('sx'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})}).addTo(M.layer));
+    M.map.fitBounds(sh.items.map(v=>[v.lat,v.lng]),{padding:[30,30],maxZoom:16});
+    setTimeout(()=>M.map.invalidateSize(),60);
+  }
 }
 $('eShopBtn').onclick=()=>askShops($('eKw').value);
 $('eKw').addEventListener('keydown',e=>{if(e.key==='Enter')$('eShopBtn').click()});
 $('shList').onclick=e=>{
-  const i=e.target.dataset.sadd;if(i==null)return;
+  const t=e.target;
+  if(t.dataset.sloc!=null){const v=sh.items[+t.dataset.sloc],M=maps['shMap'];if(M){$('shMap').scrollIntoView({behavior:'smooth',block:'center'});M.map.setView([v.lat,v.lng],17)}return}
+  const i=t.dataset.sadd;if(i==null)return;
   const v=sh.items[+i],d=+$('shDay').value;
   const ok=(a,m)=>a!==null&&a!==undefined&&a!==''&&Number.isFinite(+a)&&Math.abs(+a)<=m;
   S.stops.push({id:uid(),day:d,time:'',name:v.name,cat:'餐飲',cost:+v.price||0,note:[v.area,v.tip].filter(Boolean).join('｜'),desc:v.desc||'',
@@ -690,10 +795,13 @@ $('shList').onclick=e=>{
   sh.added[i]=true;save();renderShops();renderAll();toast('已加入 Day '+(d+1));
 };
 $('eList').onclick=e=>{
-  if(e.target.dataset.shop!=null){const it=ex.items[+e.target.dataset.shop];$('eKw').value=it.name;askShops(it.name);return}
-  const i=e.target.dataset.add;if(i==null)return;
+  const t=e.target;
+  if(t.dataset.shop!=null){const it=ex.items[+t.dataset.shop];$('eKw').value=it.name;askShops(it.name);return}
+  if(t.dataset.loc!=null){const i=+t.dataset.loc,v=ex.items[i],M=maps['eMap'];
+    if(M&&exMk[i]){$('eMapWrap').scrollIntoView({behavior:'smooth',block:'center'});M.map.setView([v.lat,v.lng],16);exMk[i].openTooltip()}else toast('地圖尚未載入');return}
+  const i=t.dataset.add;if(i==null)return;
   const v=ex.items[+i],d=+$('eDay').value;
-  const ok=(a,m)=>Number.isFinite(+a)&&a!==null&&a!==''&&Math.abs(+a)<=m;
+  const ok=(a,m)=>a!==null&&a!==undefined&&a!==''&&Number.isFinite(+a)&&Math.abs(+a)<=m;
   S.stops.push({id:uid(),day:d,time:'',name:v.name,cat:v.type==='food'?'餐飲':'景點',cost:+v.cost||0,note:v.tip||'',desc:v.desc||'',
     lat:ok(v.lat,90)?+v.lat:null,lng:ok(v.lng,180)?+v.lng:null,photo:''});
   if(v.img)grabPhoto(S.stops[S.stops.length-1],v.img);
@@ -921,6 +1029,8 @@ $('auGo').onclick=async()=>{
     const seen=new Set(),sights=[...ws,...os].filter(s=>s.lat!=null&&!seen.has(s.name)&&seen.add(s.name)).sort((a,b)=>b.score-a.score).slice(0,Math.max(numDays()*S.auto.pace*2,12));
     if(!sights.length){$('auMsg').textContent=[w,o,f].some(r=>r.status==='rejected')?'資料來源暫時連不上或請求太頻繁，請稍後再試。':'附近找不到景點資料，換大一點的地名試試。';return}
     const plan=planDays(sights,fd,numDays(),S.auto.pace,S.auto.start,S.auto.end,S.level,c);
+    $('auMsg').textContent='正在找景點照片…';
+    await Promise.all(plan.flat().filter(x=>x.cat==='景點'&&!x.img&&x.lat!=null).slice(0,24).map(x=>commonsPhoto(x.lat,x.lng).then(u=>{if(u)x.img=u}).catch(()=>{})));
     draft=plan;renderDraft();
     const need=numDays()*S.auto.pace,got=plan.flat().filter(x=>x.cat==='景點').length;
     $('auMsg').textContent=got<need?`資料不足，只排出 ${got} 個景點（需要 ${need} 個）。`:'';
@@ -932,7 +1042,7 @@ function renderDraft(){
   $('auRes').classList.remove('hidden');
   const b=+S.trip.budget||0,n=numDays();
   $('auInfo').textContent=`${n} 天，每天 ${S.auto.start}–${S.auto.end}`+(b?`，每日平均預算約 ${fmt(b/n)}（含機票住宿）`:'');
-  $('auList').innerHTML=draft.map((d,i)=>`<h4 style="margin:12px 0 4px;color:var(--acc)">Day ${i+1} · ${dayLabel(i)}</h4>`+(d.length?d.map(x=>`<div class="ex" style="padding:6px 0"><span class="time">${x.time}</span> <span class="tag">${x.cat}${x.note?'・'+x.note:''}</span><b>${esc(x.name)}</b><div class="note clamp">${esc(x.desc||'')}</div></div>`).join(''):'<div class="note">資料不足，這天沒有排入景點。</div>')).join('');
+  $('auList').innerHTML=draft.map((d,i)=>`<h4 style="margin:12px 0 4px;color:var(--acc)">Day ${i+1} · ${dayLabel(i)}</h4>`+(d.length?d.map(x=>`<div class="ex" style="padding:6px 0">${x.img?`<img src="${esc(x.img)}" alt="" onerror="this.remove()" style="float:right;width:52px;height:52px;border-radius:12px;object-fit:cover;margin-left:8px">`:''}<span class="time">${x.time}</span> <span class="tag">${x.cat}${x.note?'・'+x.note:''}</span><b>${esc(x.name)}</b><div class="note clamp">${esc(x.desc||'')}</div></div>`).join(''):'<div class="note">資料不足，這天沒有排入景點。</div>')).join('');
 }
 function applyDraft(replace){
   if(!draft)return;
