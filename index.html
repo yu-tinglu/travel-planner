@@ -577,7 +577,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
   <div class="seg" id="thMode"><button data-m="auto">跟隨手機</button><button data-m="light">☀️ 淺色</button><button data-m="dark">🌙 深色</button></div>
 </div></div>
 <div id="pkModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center"><b>📍 點選位置</b><button class="x" id="pkCancel">取消</button></div><div id="pkMapEl"></div><div class="note" id="pkMsg"></div><button id="pkOk" style="width:100%;margin-top:8px">確定</button></div></div>
-<div id="fxModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="fxT"></b><button class="x" id="fxSkip">略過</button></div><div class="note" id="fxN" style="margin:4px 0 6px"></div><div class="ps" id="fxList" style="max-height:40vh;overflow:auto"></div><button class="ghost" id="fxMap" style="width:100%;margin-top:6px">📍 我自己在地圖上點選</button><button class="x" id="fxSkipAll" style="width:100%;margin-top:4px">之後再處理（全部略過）</button></div></div>
+<div id="fxModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="fxT"></b><button class="x" id="fxSkip">略過</button></div><div class="note" id="fxN" style="margin:4px 0 6px"></div><div class="row" style="margin-bottom:6px"><input id="fxQ" placeholder="輸入地址或更精確的名稱"><button class="ghost" id="fxGo" style="flex:none">搜尋</button></div><div class="ps" id="fxList" style="max-height:40vh;overflow:auto"></div><button class="ghost" id="fxMap" style="width:100%;margin-top:6px">📍 我自己在地圖上點選</button><button class="x" id="fxSkipAll" style="width:100%;margin-top:4px">之後再處理（全部略過）</button></div></div>
 <script>
 const $=id=>document.getElementById(id);
 const KEY='trip-planner-v2';
@@ -970,16 +970,32 @@ async function openFix(id){
   const s=S.stops.find(x=>x.id===id);if(!s)return;
   fxCur=id;
   $('fxT').textContent=hasXY(s)?`只找到「${s.name}」的大概位置`:`找不到「${s.name}」的準確位置`;
-  $('fxN').textContent='請選最可能的地點，或自己在地圖上點選更精確的位置。';
+  $('fxN').textContent='請選最可能的地點；也可以在下方輸入完整地址或更精確的名稱再搜尋，或貼上座標。';
   $('fxSkip').textContent=hasXY(s)?'接受目前位置':'略過';
+  $('fxQ').value=s.name;
   $('fxList').innerHTML='<div class="note">搜尋可能的地點中…</div>';
   $('fxModal').classList.remove('hidden');
-  try{
-    fxCands=await geocodeLoose(s);
-    $('fxList').innerHTML=(hasXY(s)?`<div class="pi" data-fc="cur"><b>目前的大概位置</b><span>街道層級，可能差幾十到幾百公尺</span></div>`:'')+
-      (fxCands.length?fxCands.map((r,i)=>`<div class="pi" data-fc="${i}"><b>${esc(r.name)}</b><span>${esc(r.addr)}${r.d?' · 距目的地中心 '+(r.d<1?Math.round(r.d*1000)+' m':r.d.toFixed(1)+' km'):''}</span> <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lng}" onclick="event.stopPropagation()">用 Google 地圖確認</a></div>`).join(''):'<div class="note">沒有找到相近的地點，請用下方「在地圖上點選」。</div>');
-  }catch(e){$('fxList').innerHTML='<div class="note">'+esc(netMsg(e))+'　可以直接用地圖點選。</div>'}
+  try{fxCands=await geocodeLoose(s);renderFx(s)}catch(e){$('fxList').innerHTML='<div class="note">'+esc(netMsg(e))+'　可以直接用地圖點選。</div>'}
 }
+function renderFx(s,msg){
+  $('fxList').innerHTML=(hasXY(s)?`<div class="pi" data-fc="cur"><b>目前的大概位置</b><span>街道層級，可能差幾十到幾百公尺</span></div>`:'')+
+    (fxCands.length?fxCands.map((r,i)=>`<div class="pi" data-fc="${i}"><b>${esc(r.name)}</b><span>${esc(r.addr)}${r.d?' · 距目的地中心 '+(r.d<1?Math.round(r.d*1000)+' m':r.d.toFixed(1)+' km'):''}</span> <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lng}" onclick="event.stopPropagation()">用 Google 地圖確認</a></div>`).join(''):`<div class="note">${msg||'沒有找到相近的地點。換個寫法（例如加上區名、路名），或用下方「在地圖上點選」。'}</div>`);
+}
+$('fxGo').onclick=async()=>{
+  const s=S.stops.find(x=>x.id===fxCur);if(!s)return;
+  const q=$('fxQ').value.trim();if(!q){$('fxQ').focus();return}
+  const ll=parseLL(q);
+  if(ll){s.lat=ll.lat;s.lng=ll.lng;s.approx=false;save();renderAll();toast('已用座標設定位置');closeFix();return}
+  $('fxList').innerHTML='<div class="note">搜尋中…</div>';
+  try{
+    const dest=(S.trip.dest||'').trim(),c=dest?await geocodeCached(dest):null;
+    let r=await geocodeNear(q+(dest&&!q.includes(dest)?' '+dest:''),c);
+    if(!r.length)r=await geocodeNear(q,c);
+    if(!r.length){const alt=q.replace(/\d+之?\d*號.*$/,'').replace(/\d+弄.*$/,'').replace(/\d+巷.*$/,'').trim();if(alt&&alt!==q)r=(await geocodeNear(alt+(dest&&!alt.includes(dest)?' '+dest:''),c)).map(x=>({...x,name:x.name+'（街道附近）'}))}
+    fxCands=r.slice(0,8);renderFx(s);
+  }catch(e){fxCands=[];renderFx(s,netMsg(e))}
+};
+$('fxQ').addEventListener('keydown',e=>{if(e.key==='Enter')$('fxGo').click()});
 function closeFix(){fxCur=null;$('fxModal').classList.add('hidden');setTimeout(nextFix,400)}
 $('fxList').onclick=e=>{
   const d=e.target.closest('[data-fc]');if(!d||!fxCur)return;const s=S.stops.find(x=>x.id===fxCur);if(!s)return;
