@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
+<head><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="旅遊手帳">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
@@ -187,6 +187,7 @@ body.kind-tw .abOnly{display:none!important}
 .thb.on{border-color:var(--acc);background:var(--acc2)}
 .homebtn.tb{right:96px}
 body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,body.compact .hero .sub{display:none}body.compact h1{font-size:22px}body.compact .homebtn{bottom:12px}
+#auth{position:fixed;inset:0;z-index:95;background:rgba(20,30,30,.6);display:flex;align-items:center;justify-content:center;padding:14px}#auth.hidden{display:none}
 #fxModal{position:fixed;inset:0;z-index:86;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#fxModal.hidden{display:none}#fxSkip{white-space:nowrap;flex:none;font-size:13px}#fxModal .pkc b{font:700 16px var(--serif);color:var(--acc)}
 #pkModal{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#pkModal.hidden{display:none}.pkc{width:100%;max-width:560px;background:var(--card);border-radius:20px;padding:14px}#pkMapEl{height:56vh;border-radius:14px;margin:8px 0;z-index:0}
 .fixb{color:var(--warn)!important;font-size:12px;padding:2px 6px!important;border:1px dashed var(--warn)!important;border-radius:8px;margin-left:6px}
@@ -475,6 +476,13 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
       <div class="row" style="margin-top:8px"><button id="bkView">預覽小書</button><button class="ghost" id="bkDl">下載小書</button></div>
     </div>
     <div class="card">
+      <b>👤 帳號</b>
+      <div class="note" id="acStat"></div>
+      <div id="acIn" class="row" style="margin-top:8px"><button id="acLogin">登入</button><button class="ghost" id="acNew">建立帳號</button></div>
+      <div id="acOut" class="row hidden" style="margin-top:8px"><button class="ghost" id="acLogout">登出</button><button class="ghost" id="acDel">刪除帳號</button></div>
+      <div class="note" style="margin-top:6px">帳號只存在這支手機的瀏覽器，資料用密碼加密。忘記密碼無法找回；換裝置請用下方存檔。</div>
+    </div>
+    <div class="card">
       <b>💾 存檔／匯入</b>
       <div class="note">編輯內容會自動存在這支手機的瀏覽器。要換裝置或備份，請下載存檔檔再匯入。</div>
       <div class="row" style="margin-top:8px"><button id="svDl">下載存檔 (.json)</button></div>
@@ -565,6 +573,11 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
   <div class="seg" id="thMode"><button data-m="auto">跟隨手機</button><button data-m="light">☀️ 淺色</button><button data-m="dark">🌙 深色</button></div>
 </div></div>
 <div id="pkModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center"><b>📍 點選位置</b><button class="x" id="pkCancel">取消</button></div><div id="pkMapEl"></div><div class="note" id="pkMsg"></div><button id="pkOk" style="width:100%;margin-top:8px">確定</button></div></div>
+<div id="auth" class="hidden"><div class="pkc"><b id="authT" style="font:700 18px var(--serif);color:var(--acc)">登入</b>
+<label>帳號名稱</label><input id="auName" autocomplete="username"><label>密碼（至少 6 個字）</label><input id="auPw" type="password" autocomplete="current-password"><input id="auPw2" type="password" class="hidden" placeholder="再輸入一次密碼" autocomplete="new-password" style="margin-top:8px">
+<div class="note hidden" id="authWarn" style="margin-top:6px">忘記密碼無法找回資料，請記好，並定期下載存檔。</div><div class="note" id="authMsg" style="color:var(--warn);min-height:18px;margin-top:6px"></div>
+<div class="row" style="margin-top:8px"><button id="authGo">登入</button><button class="ghost" id="authCancel">取消</button></div>
+<div class="row" style="margin-top:6px"><button class="ghost" id="authSw"></button><button class="ghost" id="authGuest">先不登入（訪客）</button></div></div></div>
 <div id="fxModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="fxT"></b><button class="x" id="fxSkip">略過</button></div><div class="note" id="fxN" style="margin:4px 0 6px"></div><div class="row" style="margin-bottom:6px"><input id="fxQ" placeholder="輸入地址或更精確的名稱"><button class="ghost" id="fxGo" style="flex:none">搜尋</button></div><div class="ps" id="fxList" style="max-height:40vh;overflow:auto"></div><button class="ghost" id="fxMap" style="width:100%;margin-top:6px">📍 我自己在地圖上點選</button><button class="x" id="fxSkipAll" style="width:100%;margin-top:4px">之後再處理（全部略過）</button></div></div>
 <div id="setSheet" class="hidden"><div class="thc" style="max-height:88vh;overflow:auto"><div style="display:flex;justify-content:space-between;align-items:center"><b>✎ 旅程設定</b><button class="x" id="setClose">完成</button></div>
     <div>
@@ -619,12 +632,15 @@ function normalize(o){
   return r;
 }
 function uid(){return Math.random().toString(36).slice(2,9)}
-try{const r=localStorage.getItem(KEY)||localStorage.getItem('trip-planner-v2');if(r)S=normalize(JSON.parse(r))}catch(e){}
+const AUTH={user:'',key:null,locked:false,t:0};
+function accs(){try{return JSON.parse(localStorage.getItem('trip-acc')||'{}')}catch(e){return{}}}
+try{const lu=localStorage.getItem('trip-last');if(lu&&accs()[lu]){AUTH.locked=true;AUTH.user=lu}else{const r=localStorage.getItem(KEY)||localStorage.getItem('trip-planner-v2');if(r)S=normalize(JSON.parse(r))}}catch(e){}
 let day=0,editId=null,scope='day',ex={place:'',summary:'',items:[]},pending=null,phTarget=null;
 
 function toastUndo(m,fn){const t=$('toast');t.textContent=m+' ';const b=document.createElement('button');b.className='ub';b.textContent='復原';b.onclick=()=>{fn();t.classList.add('hidden')};t.appendChild(b);t.classList.remove('hidden');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hidden'),6000)}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hidden'),2600)}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){toast('瀏覽器空間不足，部分內容（如照片）可能沒有保存，建議先下載存檔');return false}}
+function save(){if(AUTH.locked)return false;if(AUTH.user&&AUTH.key){clearTimeout(AUTH.t);AUTH.t=setTimeout(saveEnc,250);return true}
+  try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){toast('瀏覽器空間不足，部分內容（如照片）可能沒有保存，建議先下載存檔');return false}}
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>Math.round(n).toLocaleString('zh-TW');
 async function cap(n){try{return window.claude&&await window.claude.use(n)}catch(e){return null}}
@@ -1928,7 +1944,7 @@ async function tripWeather(c){
 function buildTips(w){
   const out={doc:[],plan:[],weather:[],place:[],culture:[],money:[],power:[],transport:[],safe:[]},pk=new Set(),stats=[];
   const dest=(S.trip.dest||'').trim(),ct=S.kind==='tw'?null:ctryOf(dest),tw=S.kind==='tw'||(S.kind!=='abroad'&&isTW(dest)),nd=numDays(),add=(c,t,warn)=>out[c].push({t,warn:!!warn}),pp=a=>(a||[]).forEach(x=>pk.add(x));
-  if(!dest)add('plan','尚未設定目的地，先到「出發」選好目的地，建議會更準。',true);
+  if(!dest)add('plan','尚未設定目的地，先到「行程」右上角的「旅程設定」選好目的地，建議會更準。',true);
   if(!S.trip.start)add('plan','尚未設定出發與回程日期，天氣與休館日建議會少一些。');
   if(ct){
     add('doc',`護照效期通常要有 6 個月以上，並確認入境規定（簽證、電子授權、入境卡）。`,true);
@@ -1989,14 +2005,14 @@ function buildTips(w){
   if(orphan)add('plan',`有 ${orphan} 個行程排在旅程天數之外，請確認日期或把行程搬到正確的日子。`,true);
   /* 機票、住宿、預算 */
   if(!tw&&dest){if(!S.fq.some(q=>q.chosen))add('plan','還沒選定機票，機票價格會浮動，建議先比價再訂，並確認行李額度。',true);}
-  if(dest&&nd>1&&!(+S.lodging.price))add('plan','住宿價格還沒填，預算會偏低，記得到「預算」填入每晚價格。',true);
+  if(dest&&nd>1&&!(+S.lodging.price))add('plan','住宿價格還沒填，預算會偏低，記得到「預算準備」的「機票住宿」填入每晚價格。',true);
   if(dest&&nd>1)add('plan','住宿請確認入住與退房時間、取消規定，以及是否提供行李寄放。');
   const bud=+S.trip.budget||0;
   if(bud){const pl=planned(),sp=Object.values(pl).reduce((a,b)=>a+b,0);
     if(sp>bud)add('money',`目前預估總花費 ${fmt(sp)} 已超出預算 ${fmt(bud)}，要調整行程或提高預算。`,true);
     else if(sp>bud*.85)add('money',`目前預估花費已使用預算的 ${Math.round(sp/bud*100)}%，餘裕不多，記得預留機動金。`);
     const al=S.alloc||{};CATS.forEach(([k,l])=>{const a=+al[k]||0;if(a&&pl[k]>a)add('money',`「${l}」預估 ${fmt(pl[k])} 超過分配的 ${fmt(a)}。`,true)});
-  }else add('money','還沒設定總預算，到「預算」填入金額，可以幫你控制分類花費。');
+  }else add('money','還沒設定總預算，到「預算準備」填入金額，可以幫你控制分類花費。');
   if(!tw&&dest)add('money','建議帶一張海外手續費低的信用卡與一張備用卡，分開放；手機也設好行動支付。');
   if(S.pax>=3)add('plan',`${S.pax} 人同行，餐廳、計程車與房型要提前確認人數是否容納。`);
   add('safe','出發前把行程、住宿地址與訂位資料下載存檔（可在「存檔」匯出或做旅遊小書），到當地網路不穩時也能看。');
@@ -2138,7 +2154,7 @@ function mbFor(dest){
 function renderBuy(){
   const d=(S.trip.dest||'').trim();
   $('byTypes').innerHTML=BUY_TYPES.filter(t=>!(S.kind==='tw'&&t[0]==='duty')).map(([k,l])=>`<button class="chip ${buyType===k?'on':''}" data-by="${k}">${l}</button>`).join('');
-  if(!d){$('byHead').textContent='先在「出發」設定目的地，這裡會列出當地必買。';$('byList').innerHTML='';return}
+  if(!d){$('byHead').textContent='先在「行程」的「旅程設定」設定目的地，這裡會列出當地必買。';$('byList').innerHTML='';return}
   const r=mbFor(d);
   if(!r){$('byHead').textContent='內建資料裡沒有「'+d+'」，可以用下面的搜尋工具找當地特產與商店。';$('byList').innerHTML='';return}
   $('byHead').textContent='整理「'+d+'」常見的必買，請依預算與喜好挑選，價格與品牌可能會變。';
@@ -2193,6 +2209,71 @@ renderWish();
 
 /* ---------- 首頁：今天要去哪 ---------- */
 let hmKind='',hmRegK='';
+
+/* ---------- 本機帳號（密碼加密，資料只留在這支瀏覽器） ---------- */
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u))),ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pw,salt){const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:150000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function encStr(key,str){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(str));return{iv:b64(iv),ct:b64(ct)}}
+async function decStr(key,o){return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(o.iv)},key,ub64(o.ct)))}
+async function saveEnc(){if(!AUTH.user||!AUTH.key||AUTH.locked)return;
+  try{localStorage.setItem('trip-u:'+AUTH.user,JSON.stringify(await encStr(AUTH.key,JSON.stringify(S))))}catch(e){toast('瀏覽器空間不足，建議先下載存檔')}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&AUTH.user&&AUTH.key){clearTimeout(AUTH.t);saveEnc()}});
+function refreshAll(){day=0;editId=null;ex={place:'',summary:'',items:[],added:{}};syncTripInputs();$('fOrigin').value=S.origin;$('fPax').value=String(S.pax);['lvA','lvF'].forEach(x=>$(x).value=S.level);$('auS').value=S.auto.start;$('auE').value=S.auto.end;$('auPace').value=String(S.auto.pace);renderRevChips();renderExplore();renderAll();resetForm();loadWeather()}
+let auMode='in';
+function authUI(){
+  const a=accs(),names=Object.keys(a);
+  $('acStat').innerHTML=AUTH.user?`目前登入：<b>${esc(AUTH.user)}</b>（資料已用密碼加密）`:'目前是訪客模式（資料未加密）';
+  $('acIn').classList.toggle('hidden',!!AUTH.user);$('acOut').classList.toggle('hidden',!AUTH.user);
+}
+function openAuth(mode,lock){auMode=mode;const a=accs(),names=Object.keys(a);
+  $('auth').classList.remove('hidden');$('auth').dataset.lock=lock?'1':'';
+  $('authT').textContent=mode==='new'?'建立帳號':'登入';
+  $('auName').value=lock?AUTH.user:(names[0]||'');$('auName').readOnly=!!lock;$('auPw').value='';$('auPw2').value='';$('authMsg').textContent='';
+  $('auPw2').classList.toggle('hidden',mode!=='new');$('authGo').textContent=mode==='new'?'建立並登入':'登入';
+  $('authGuest').classList.toggle('hidden',!lock);$('authCancel').classList.toggle('hidden',!!lock);$('authSw').classList.toggle('hidden',!!lock);
+  $('authSw').textContent=mode==='new'?'已有帳號？改為登入':'沒有帳號？建立一個';
+  $('authWarn').classList.toggle('hidden',mode!=='new');}
+function closeAuth(){$('auth').classList.add('hidden');$('auPw').value='';$('auPw2').value=''}
+$('authSw').onclick=()=>openAuth(auMode==='new'?'in':'new',false);
+$('authCancel').onclick=closeAuth;
+$('authGuest').onclick=()=>{AUTH.locked=false;AUTH.user='';AUTH.key=null;localStorage.removeItem('trip-last');closeAuth();authUI();hmShow()};
+$('authGo').onclick=async()=>{
+  const name=$('auName').value.trim(),pw=$('auPw').value,msg=$('authMsg');
+  if(!name){msg.textContent='請輸入帳號名稱';return}
+  if(pw.length<6){msg.textContent='密碼至少 6 個字';return}
+  if(!(window.crypto&&crypto.subtle)){msg.textContent='這個瀏覽器不支援加密功能（需要 https 網址）';return}
+  $('authGo').disabled=true;msg.textContent='處理中…';
+  try{
+    const a=accs();
+    if(auMode==='new'){
+      if(a[name]){msg.textContent='這個帳號名稱已存在';return}
+      if(pw!==$('auPw2').value){msg.textContent='兩次密碼不一致';return}
+      const salt=crypto.getRandomValues(new Uint8Array(16)),key=await deriveKey(pw,salt);
+      a[name]={salt:b64(salt),chk:await encStr(key,'ok')};localStorage.setItem('trip-acc',JSON.stringify(a));
+      AUTH.user=name;AUTH.key=key;AUTH.locked=false;localStorage.setItem('trip-last',name);
+      await saveEnc();localStorage.removeItem(KEY);localStorage.removeItem('trip-planner-v2');
+      closeAuth();authUI();toast('帳號已建立，目前資料已加密保存');
+    }else{
+      const acc=a[name];if(!acc){msg.textContent='找不到這個帳號';return}
+      const key=await deriveKey(pw,ub64(acc.salt));
+      try{if(await decStr(key,acc.chk)!=='ok')throw 0}catch(e){msg.textContent='密碼錯誤';return}
+      let data=null;const raw=localStorage.getItem('trip-u:'+name);
+      if(raw){try{data=JSON.parse(await decStr(key,JSON.parse(raw)))}catch(e){msg.textContent='資料無法解密';return}}
+      const wasLocked=AUTH.locked;
+      AUTH.user=name;AUTH.key=key;AUTH.locked=false;localStorage.setItem('trip-last',name);
+      if(data)S=normalize(data);else if(wasLocked)S=normalize({});
+      closeAuth();authUI();refreshAll();hmShow();toast('歡迎回來，'+name);
+    }
+  }catch(e){msg.textContent='發生錯誤：'+(e&&e.message||e)}
+  finally{$('authGo').disabled=false}
+};
+['auPw','auPw2'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('authGo').click()}));
+$('acNew').onclick=()=>openAuth('new',false);
+$('acLogin').onclick=()=>{if(!Object.keys(accs()).length){openAuth('new',false);$('authMsg').textContent='還沒有帳號，請先建立';return}openAuth('in',false)};
+$('acLogout').onclick=async()=>{await saveEnc();localStorage.removeItem('trip-last');location.reload()};
+$('acDel').onclick=()=>{if(!AUTH.user)return;if(!confirm('刪除帳號「'+AUTH.user+'」與它的所有行程？無法復原。建議先下載存檔。'))return;
+  const a=accs();delete a[AUTH.user];localStorage.setItem('trip-acc',JSON.stringify(a));localStorage.removeItem('trip-u:'+AUTH.user);localStorage.removeItem('trip-last');location.reload()};
 function hmShow(){
   const has=S.trip.dest||S.stops.length,t=S.trip;
   $('hmResume').classList.toggle('hidden',!has);
@@ -2284,7 +2365,9 @@ resetForm();
 renderAll();
 loadWeather();
 document.querySelector('nav button[data-t="plan"]').click();
-hmShow();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+hmShow();authUI();
+if(AUTH.locked)openAuth('in',true);
 </script>
 </body>
 </html>
