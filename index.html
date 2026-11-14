@@ -187,6 +187,9 @@ body.kind-tw .abOnly{display:none!important}
 .thb.on{border-color:var(--acc);background:var(--acc2)}
 .homebtn.tb{right:96px}
 body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,body.compact .hero .sub{display:none}body.compact h1{font-size:22px}body.compact .homebtn{bottom:12px}
+#roBar{position:fixed;top:0;left:0;right:0;z-index:60;background:var(--acc);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top) + 6px) 14px 8px;font-size:14px}#roBar.hidden{display:none}#roBar button{background:#fff;color:var(--acc);padding:6px 12px;font-size:13px}
+body.ro{padding-top:46px}body.ro #addBox,body.ro .acts,body.ro .grip,body.ro #dayAuto,body.ro nav button[data-t=data],body.ro .stay select,body.ro .lm,body.ro #setOpen{display:none!important}
+#todayCard{border-left:5px solid var(--acc2,#e0643c)}#todayCard b{font:700 16px var(--serif)}#todayCard .row a{flex:1;text-align:center;text-decoration:none;padding:11px;border-radius:12px;background:var(--acc);color:#fff;font-weight:600;font-size:14px}#todayCard .row a.g{background:var(--chip,#e5efec);color:var(--acc)}
 #auth{position:fixed;inset:0;z-index:95;background:rgba(20,30,30,.6);display:flex;align-items:center;justify-content:center;padding:14px}#auth.hidden{display:none}
 #fxModal{position:fixed;inset:0;z-index:86;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#fxModal.hidden{display:none}#fxSkip{white-space:nowrap;flex:none;font-size:13px}#fxModal .pkc b{font:700 16px var(--serif);color:var(--acc)}
 #pkModal{position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}#pkModal.hidden{display:none}.pkc{width:100%;max-width:560px;background:var(--card);border-radius:20px;padding:14px}#pkMapEl{height:56vh;border-radius:14px;margin:8px 0;z-index:0}
@@ -219,6 +222,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
       <div style="display:flex;justify-content:flex-end;align-items:center"><button class="ghost" id="wxRefresh" style="padding:5px 12px">重新整理</button></div>
       <div id="wxBody" style="margin-top:8px"><div class="note">設定目的地後，這裡會顯示當地天氣。</div></div>
     </details>
+    <div id="todayCard" class="card hidden"></div>
     <div class="chips" id="dayChips"></div>
 
 
@@ -485,7 +489,8 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
     <div class="card">
       <b>💾 存檔／匯入</b>
       <div class="note">編輯內容會自動存在這支手機的瀏覽器。要換裝置或備份，請下載存檔檔再匯入。</div>
-      <div class="row" style="margin-top:8px"><button id="svDl">下載存檔 (.json)</button></div>
+      <div class="row" style="margin-top:8px"><button id="svDl">下載存檔 (.json)</button><button class="ghost" id="svEnc">🔐 加密備份</button></div>
+      <div class="note" style="margin-top:6px">換手機：用「加密備份」下載，傳到新手機後在下方匯入並輸入密碼。</div>
       <label>匯入存檔檔</label>
       <input type="file" id="imFile" accept=".json,application/json">
       <label>或貼上存檔內容</label>
@@ -495,6 +500,15 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
         <div class="note" id="imInfo"></div>
         <div class="row" style="margin-top:6px"><button id="imApply">覆蓋目前資料並匯入</button><button class="ghost" id="imCancel">取消</button></div>
       </div>
+    </div>
+    <div class="card">
+      <b>🔗 分享與行事曆</b>
+      <div class="note">產生唯讀連結給旅伴看（不含你上傳的照片）；或把行程匯入 iPhone 行事曆，出發前 30 分鐘提醒。</div>
+      <div class="row" style="margin-top:8px"><button id="shLink">產生分享連結</button><button class="ghost" id="icsDl">📅 匯出行事曆</button></div>
+    </div>
+    <div class="card" id="statCard">
+      <b>📊 旅程統計</b>
+      <div id="statBody" class="note" style="margin-top:6px"></div>
     </div>
     <div class="card">
       <b>📝 文字版行程</b>
@@ -573,6 +587,7 @@ body.compact .hero{min-height:0;padding:14px 0 46px}body.compact .hero .eyebrow,
   <div class="seg" id="thMode"><button data-m="auto">跟隨手機</button><button data-m="light">☀️ 淺色</button><button data-m="dark">🌙 深色</button></div>
 </div></div>
 <div id="pkModal" class="hidden"><div class="pkc"><div style="display:flex;justify-content:space-between;align-items:center"><b>📍 點選位置</b><button class="x" id="pkCancel">取消</button></div><div id="pkMapEl"></div><div class="note" id="pkMsg"></div><button id="pkOk" style="width:100%;margin-top:8px">確定</button></div></div>
+<div id="roBar" class="hidden"><span>👀 唯讀分享</span><button id="roSave">存成我的行程</button></div>
 <div id="auth" class="hidden"><div class="pkc"><b id="authT" style="font:700 18px var(--serif);color:var(--acc)">登入</b>
 <label>帳號名稱</label><input id="auName" autocomplete="username"><label>密碼（至少 6 個字）</label><input id="auPw" type="password" autocomplete="current-password"><input id="auPw2" type="password" class="hidden" placeholder="再輸入一次密碼" autocomplete="new-password" style="margin-top:8px">
 <div class="note hidden" id="authWarn" style="margin-top:6px">忘記密碼無法找回資料，請記好，並定期下載存檔。</div><div class="note" id="authMsg" style="color:var(--warn);min-height:18px;margin-top:6px"></div>
@@ -626,7 +641,7 @@ const WD=['日','一','二','三','四','五','六'];
 let S={trip:{name:'',dest:'',start:'',end:'',budget:''},stops:[],pack:[],intro:null,rev:['g','ifoodie','dcard'],fq:[],lodging:{nights:'',price:''},alloc:{},exp:[],cur:'NT$',tripType:'round',origin:'台北',pax:1,level:'mid',auto:{start:'09:00',end:'20:00',pace:3},wish:[],kind:''};
 function normalize(o){
   const r={trip:Object.assign({name:'',dest:'',start:'',end:'',budget:''},o.trip||{}),stops:[],pack:[],wish:[],kind:['tw','abroad'].includes(o.kind)?o.kind:'',intro:o.intro||null,rev:Array.isArray(o.rev)?o.rev.filter(x=>['g','ifoodie','dcard','ptt','pixnet','xhs'].includes(x)):['g','ifoodie','dcard'],fq:(o.fq||[]).filter(q=>q&&typeof q==='object').map(q=>({id:q.id||uid(),al:q.al||'',src:q.src||'其他',price:+q.price||0,bag:q.bag==='out'?'out':'in',fee:+q.fee||0,stop:['0','1','2'].includes(String(q.stop))?String(q.stop):'0',note:q.note||'',chosen:!!q.chosen})),lodging:Object.assign({nights:'',price:''},o.lodging||{}),alloc:Object.assign({},o.alloc||{}),exp:(o.exp||[]).filter(x=>x&&x.cat).map(x=>({id:x.id||uid(),cat:x.cat,amount:+x.amount||0,note:x.note||''})),cur:o.cur||'NT$',tripType:o.tripType==='one'?'one':'round',origin:o.origin||'台北',pax:+o.pax||1,level:['low','mid','high'].includes(o.level)?o.level:'mid',auto:Object.assign({start:'09:00',end:'20:00',pace:3},o.auto||{})};
-  (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),approx:!!s.approx,tl:s.tl===undefined?!!s.time:!!s.tl,mode:['transit','walking','driving'].includes(s.mode)?s.mode:'',dur:Math.max(0,Math.min(1440,+s.dur||0)),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
+  (o.stops||[]).forEach(s=>{if(s&&s.name)r.stops.push({id:s.id||uid(),approx:!!s.approx,tl:s.tl===undefined?!!s.time:!!s.tl,mode:['transit','walking','driving'].includes(s.mode)?s.mode:'',dur:Math.max(0,Math.min(1440,+s.dur||0)),day:+s.day||0,time:s.time||'',name:String(s.name),cat:EMO[s.cat]?s.cat:'其他',cost:+s.cost||0,paid:!!s.paid,note:s.note||'',desc:s.desc||'',lat:Number.isFinite(+s.lat)&&s.lat!==null&&s.lat!==''?+s.lat:null,lng:Number.isFinite(+s.lng)&&s.lng!==null&&s.lng!==''?+s.lng:null,photo:typeof s.photo==='string'?s.photo:''})});
   (o.pack||[]).forEach(p=>{if(p&&p.text)r.pack.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   (o.wish||[]).forEach(p=>{if(p&&p.text)r.wish.push({id:p.id||uid(),text:String(p.text),done:!!p.done})});
   return r;
@@ -639,7 +654,8 @@ let day=0,editId=null,scope='day',ex={place:'',summary:'',items:[]},pending=null
 
 function toastUndo(m,fn){const t=$('toast');t.textContent=m+' ';const b=document.createElement('button');b.className='ub';b.textContent='復原';b.onclick=()=>{fn();t.classList.add('hidden')};t.appendChild(b);t.classList.remove('hidden');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hidden'),6000)}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.remove('hidden');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.add('hidden'),2600)}
-function save(){if(AUTH.locked)return false;if(AUTH.user&&AUTH.key){clearTimeout(AUTH.t);AUTH.t=setTimeout(saveEnc,250);return true}
+let RO=false;
+function save(){if(AUTH.locked||RO)return false;if(AUTH.user&&AUTH.key){clearTimeout(AUTH.t);AUTH.t=setTimeout(saveEnc,250);return true}
   try{localStorage.setItem(KEY,JSON.stringify(S));return true}catch(e){toast('瀏覽器空間不足，部分內容（如照片）可能沒有保存，建議先下載存檔');return false}}
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>Math.round(n).toLocaleString('zh-TW');
@@ -898,10 +914,10 @@ function renderDays(){
       <div class="thumb" data-ph="${s.id}">${s.photo?`<img src="${s.photo}" alt="">`:EMO[s.cat]}</div>
       <div class="grow">
         <div class="nm"><b>${esc(s.name)}</b><a class="pin" data-gm="${esc(s.name)}" data-gmp="${esc(S.trip.dest||'')}" ${hasXY(s)?`data-lat="${s.lat}" data-lng="${s.lng}"`:''} target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}">📍</a>${s.approx?`<button class="x fixb" data-fix="${s.id}">≈ 約略位置・修正</button>`:(!hasXY(s)&&locTried.has(s.id)?`<button class="x fixb" data-fix="${s.id}">⚠ 未定位・修正</button>`:'')}</div>
-        <div class="note one"><span class="tag">${esc(s.cat)}</span>⏱${durLabel(durOf(s))} · ${s.cost?fmt(s.cost)+' · ':''}${esc(s.note||s.desc||'')}</div>
+        <div class="note one"><span class="tag">${esc(s.cat)}</span>⏱${durLabel(durOf(s))} · ${s.cost?(s.paid?'✓已付 ':'')+fmt(s.cost)+' · ':''}${esc(s.note||s.desc||'')}</div>
         <div class="stay">⏱ 停留 <select class="ds" data-ds="${s.id}">${[...new Set([...(s.dur?[]:[0]),...DUR_OPTS,s.dur||0])].filter(x=>x>=0).sort((x,y)=>x-y).map(m=>m===0?`<option value="" ${!s.dur?'selected':''}>預估 ${durLabel(durOf(s))}</option>`:`<option value="${m}" ${s.dur===m?'selected':''}>${durLabel(m)}</option>`).join('')}</select>${tmin(s.time)!=null?`<span class="note"> → ${tfrom(Math.min(tmin(s.time)+durOf(s),1439))} 結束</span>`:''}</div>
       </div>
-      <div class="acts"><button class="x" data-e="${s.id}" title="編輯">✎</button><button class="x" data-x="${s.id}" title="刪除">✕</button></div>
+      <div class="acts"><button class="x" data-e="${s.id}" title="編輯">✎</button><button class="x" data-pay="${s.id}" title="記帳">💰</button><button class="x" data-x="${s.id}" title="刪除">✕</button></div>
       ${legHTML(s,list[i+1])}
     </div>`).join(''):'<div class="empty">這天還沒有行程<button class="big" id="dayAuto">✨ 幫我排這一天</button><div class="note" style="margin-top:8px">或從下方手動新增、到「探索」挑景點</div></div>';
 }
@@ -911,7 +927,7 @@ function renderPack(){
   $('pList').innerHTML=S.pack.length?S.pack.map(p=>`
     <div class="pk ${p.done?'done':''}"><input type="checkbox" data-p="${p.id}" ${p.done?'checked':''}><span class="grow">${esc(p.text)}</span><button class="x" data-px="${p.id}">✕</button></div>`).join(''):'<div class="empty">清單是空的</div>';
 }
-function renderAll(){if(typeof updateFlights==='function')updateFlights();renderHead();fillDaySelects();renderDays();renderMap();renderBudget();renderPack()}
+function renderAll(){if(typeof updateFlights==='function')updateFlights();renderHead();fillDaySelects();renderDays();renderMap();renderBudget();renderPack();renderToday();renderStats()}
 
 /* ---------- 旅程設定 ---------- */
 [['tName','name'],['tDest','dest'],['tBudget','budget'],['tStart','start'],['tEnd','end']].forEach(([id,k])=>{
@@ -1213,6 +1229,7 @@ $('stops').onclick=e=>{
   const lm=e.target.closest('[data-lm]');
   if(lm){const st=S.stops.find(v=>v.id===lm.dataset.lm);if(st){st.mode=lm.dataset.m;reflow(day,true);save();renderDays();renderMap()}return}
   const x=e.target.dataset.x,ed=e.target.dataset.e,ph=e.target.closest('[data-ph]');
+  const py=e.target.dataset.pay;if(py){const st=S.stops.find(z=>z.id===py);if(st){const v=prompt('實際花了多少？（'+(S.cur||'NT$')+'，留空代表清除）',st.paid?st.cost:'');if(v!==null){const n=+String(v).replace(/[^\d.]/g,'');if(v.trim()===''){st.paid=false}else if(n>=0){st.cost=n;st.paid=true}save();renderAll()}}return}
   if(x){const bak=JSON.parse(JSON.stringify(S.stops)),dd=day;S.stops=S.stops.filter(s=>s.id!==x);reflow(dd,true);save();renderAll();toastUndo('已刪除',()=>{S.stops=bak;save();renderAll()})}
   else if(ed){const s=S.stops.find(v=>v.id===ed);editId=ed;
     $('sTime').value=s.time;setDur(s.dur);$('sName').value=s.name;$('sCat').value=s.cat;$('sCost').value=s.cost||'';$('sNote').value=s.note;$('sDay').value=String(s.day);
@@ -2263,7 +2280,7 @@ $('authGo').onclick=async()=>{
       const wasLocked=AUTH.locked;
       AUTH.user=name;AUTH.key=key;AUTH.locked=false;localStorage.setItem('trip-last',name);
       if(data)S=normalize(data);else if(wasLocked)S=normalize({});
-      closeAuth();authUI();refreshAll();hmShow();toast('歡迎回來，'+name);
+      closeAuth();authUI();refreshAll();hmShow();toast('歡迎回來，'+name);checkIncoming();
     }
   }catch(e){msg.textContent='發生錯誤：'+(e&&e.message||e)}
   finally{$('authGo').disabled=false}
@@ -2274,6 +2291,70 @@ $('acLogin').onclick=()=>{if(!Object.keys(accs()).length){openAuth('new',false);
 $('acLogout').onclick=async()=>{await saveEnc();localStorage.removeItem('trip-last');location.reload()};
 $('acDel').onclick=()=>{if(!AUTH.user)return;if(!confirm('刪除帳號「'+AUTH.user+'」與它的所有行程？無法復原。建議先下載存檔。'))return;
   const a=accs();delete a[AUTH.user];localStorage.setItem('trip-acc',JSON.stringify(a));localStorage.removeItem('trip-u:'+AUTH.user);localStorage.removeItem('trip-last');location.reload()};
+
+/* ---------- 加密備份 / 分享 / 行事曆 / 今日 / 統計 ---------- */
+async function readBackup(text){
+  const o=JSON.parse(text);
+  if(o&&o.enc){const pw=prompt('這是加密備份，請輸入密碼');if(pw===null)return null;
+    try{const key=await deriveKey(pw,ub64(o.salt));return JSON.parse(await decStr(key,o))}catch(e){toast('密碼錯誤或檔案損毀');return null}}
+  return o;
+}
+$('svEnc').onclick=async()=>{
+  if(!(window.crypto&&crypto.subtle)){toast('這個瀏覽器不支援加密');return}
+  const pw=prompt('設定備份密碼（至少 6 個字，忘記就打不開）');if(pw===null)return;if(pw.length<6){toast('密碼至少 6 個字');return}
+  const salt=crypto.getRandomValues(new Uint8Array(16)),key=await deriveKey(pw,salt),e=await encStr(key,JSON.stringify({app:'trip-planner',v:2,...S}));
+  if(await saveFile(safeName()+'-加密備份.json',JSON.stringify({app:'trip-planner',enc:1,salt:b64(salt),...e}),'application/json'))toast('已下載加密備份');
+};
+$('imFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const o=await readBackup(await f.text());if(o)stage(o)}catch(err){toast('檔案無法讀取，請確認是匯出的 .json')}};
+$('imPaste').onclick=async()=>{try{const o=await readBackup($('imText').value);if(o)stage(o)}catch(err){toast('貼上的內容不是有效的 JSON')}};
+
+const b64u=u8=>b64(u8).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''),ub64u=s=>ub64(s.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((s.length+3)%4));
+async function gz(str,dec){const cs=new (dec?DecompressionStream:CompressionStream)('gzip'),w=cs.writable.getWriter();w.write(dec?str:new TextEncoder().encode(str));w.close();const buf=new Uint8Array(await new Response(cs.readable).arrayBuffer());return dec?new TextDecoder().decode(buf):buf}
+$('shLink').onclick=async()=>{
+  if(!window.CompressionStream){toast('這個瀏覽器不支援，請改用下載存檔');return}
+  const d=JSON.parse(JSON.stringify(S));d.stops.forEach(s=>{if((s.photo||'').startsWith('data:'))s.photo=''});delete d.fq;delete d.exp;delete d.pack;
+  const url=location.origin+location.pathname+'#s='+b64u(await gz(JSON.stringify(d)));
+  try{if(navigator.share){await navigator.share({title:S.trip.name||'旅遊行程',url});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(url);toast('已複製分享連結（'+Math.ceil(url.length/1000)+'KB）')}catch(e){fallback(url)}
+};
+async function bootShare(){
+  const m=location.hash.match(/^#s=(.+)$/);if(!m)return false;
+  try{const o=JSON.parse(await gz(ub64u(m[1]),true));if(!o||!Array.isArray(o.stops))throw 0;
+    sessionStorage.setItem('trip-incoming',JSON.stringify(o));
+    AUTH.locked=false;closeAuth();RO=true;S=normalize(o);document.body.classList.add('ro');$('roBar').classList.remove('hidden');$('home').classList.add('hidden');
+    refreshAll();return true}catch(e){toast('分享連結已損毀或不完整');return false}
+}
+$('roSave').onclick=()=>{history.replaceState(null,'',location.pathname);location.reload()};
+function checkIncoming(){
+  const r=sessionStorage.getItem('trip-incoming');if(!r||RO)return;sessionStorage.removeItem('trip-incoming');
+  try{const o=JSON.parse(r);if(confirm('要把剛才看的分享行程「'+(o.trip&&o.trip.name||'未命名')+'」存成你的行程嗎？會覆蓋目前資料。')){S=normalize(o);save();refreshAll();$('home').classList.add('hidden')}}catch(e){}
+}
+function icsEsc(s){return String(s||'').replace(/[\;,]/g,m=>'\\'+m).replace(/\n/g,'\\n')}
+$('icsDl').onclick=async()=>{
+  if(!S.trip.start){toast('請先在「旅程設定」填出發日期');return}
+  const p2=n=>String(n).padStart(2,'0'),stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';let o=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//travel-planner//ZH','CALSCALE:GREGORIAN'],n=0;
+  S.stops.forEach(s=>{if(!s.time)return;const d=new Date(S.trip.start+'T00:00');d.setDate(d.getDate()+s.day);const a=tmin(s.time),e=Math.min(a+durOf(s),1439),ds=d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate());
+    o.push('BEGIN:VEVENT','UID:'+s.id+'@travel-planner','DTSTAMP:'+stamp,'DTSTART:'+ds+'T'+p2(Math.floor(a/60))+p2(a%60)+'00','DTEND:'+ds+'T'+p2(Math.floor(e/60))+p2(e%60)+'00','SUMMARY:'+icsEsc(s.name),'DESCRIPTION:'+icsEsc(s.note||s.cat),hasXY(s)?'GEO:'+s.lat+';'+s.lng:'X-NONE:1','BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(s.name),'END:VALARM','END:VEVENT');n++});
+  if(!n){toast('還沒有排好時間的行程');return}
+  o.push('END:VCALENDAR');if(await saveFile(safeName()+'-行程.ics',o.join('\r\n'),'text/calendar'))toast('已匯出 '+n+' 個行程到行事曆檔');
+};
+function todayIdx(){if(!S.trip.start)return -1;const t=new Date(),a=new Date(S.trip.start+'T00:00'),b=new Date(t.getFullYear(),t.getMonth(),t.getDate()),i=Math.round((b-a)/864e5);return i>=0&&i<numDays()?i:-1}
+function renderToday(){
+  const c=$('todayCard'),i=todayIdx();if(i<0||RO&&0){c.classList.add('hidden');return}
+  const l=dayStops(i);if(!l.length){c.classList.add('hidden');return}
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes();let k=l.findIndex(s=>s.time&&tmin(s.time)+durOf(s)>nm);if(k<0)k=l.length;
+  if(k>=l.length){c.innerHTML='<b>🌙 今天的行程都走完了</b><div class="note">辛苦了，記得到「預算準備」記一下花費。</div>';c.classList.remove('hidden');return}
+  const s=l[k],pv=k?l[k-1]:null,L=pv?legMin(pv,s,effMode(pv)):null;
+  const nav=hasXY(s)?`<div class="row" style="margin-top:8px"><a href="https://maps.apple.com/?daddr=${s.lat},${s.lng}&q=${encodeURIComponent(s.name)}" target="_blank" rel="noopener">🧭 Apple 地圖</a><a class="g" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">Google 地圖</a></div>`:`<div class="row" style="margin-top:8px"><a class="g" href="https://www.google.com/maps/search/?api=1&query=${mapQ(s)}" target="_blank" rel="noopener">在地圖搜尋</a></div>`;
+  c.innerHTML=`<b>📍 今天・下一站</b><div style="margin-top:4px;font-size:17px">${esc(s.time||'')} ${esc(s.name)}</div><div class="note">Day ${i+1} 的第 ${k+1}/${l.length} 站${L?'｜從上一站約 '+L.min+' 分鐘':''}｜預計停留 ${durLabel(durOf(s))}</div>${nav}`;
+  c.classList.remove('hidden');
+}
+function renderStats(){
+  const el=$('statBody');if(!el)return;const dn=numDays();let km=0;
+  for(let d=0;d<dn;d++){const l=dayStops(d).filter(hasXY);for(let i=1;i<l.length;i++){const a=l[i-1],b=l[i],R=6371,r=x=>x*Math.PI/180,h=Math.sin(r(b.lat-a.lat)/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(r(b.lng-a.lng)/2)**2;km+=2*R*Math.asin(Math.sqrt(h))}}
+  const paid=S.stops.filter(s=>s.paid).reduce((a,s)=>a+s.cost,0),pl=planned(),tot=Object.values(pl).reduce((a,b)=>a+b,0),top=CATS.map(([k,n])=>[n,pl[k]]).sort((a,b)=>b[1]-a[1])[0];
+  el.innerHTML=`${dn} 天・${S.stops.length} 個景點／餐廳<br>直線移動約 ${km.toFixed(1)} 公里（粗估）<br>總花費 ${money(tot)}${paid?'（其中已記帳 '+money(paid)+'）':''}${dn?'｜平均每天 '+money(tot/dn):''}${top&&top[1]>0?'<br>花最多的是「'+esc(top[0])+'」'+money(top[1]):''}`;
+}
 function hmShow(){
   const has=S.trip.dest||S.stops.length,t=S.trip;
   $('hmResume').classList.toggle('hidden',!has);
@@ -2368,6 +2449,7 @@ document.querySelector('nav button[data-t="plan"]').click();
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 hmShow();authUI();
 if(AUTH.locked)openAuth('in',true);
+bootShare().then(r=>{if(!r&&!AUTH.locked)checkIncoming()});
 </script>
 </body>
 </html>
